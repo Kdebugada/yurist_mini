@@ -98,13 +98,16 @@
         }
 
         function handleClick(service) {
-            tg.sendData(JSON.stringify({
-                service: service,
-                timestamp: Date.now()
-            }));
-            
-            // Закрываем Mini App после выбора
-            tg.close();
+            if (service === 'lawyer') {
+                // Перенаправляем на страницу юриста
+                window.location.href = './lawyer.html';
+            } else {
+                tg.sendData(JSON.stringify({
+                    service: service,
+                    timestamp: Date.now()
+                }));
+                tg.close();
+            }
         }
     </script>
 </body>
