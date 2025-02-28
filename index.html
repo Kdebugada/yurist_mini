@@ -99,8 +99,10 @@
 
         function handleClick(service) {
             if (service === 'lawyer') {
-                // Перенаправляем на страницу юриста
-                window.location.href = './lawyer.html';
+                // Используем абсолютный путь для GitHub Pages
+                const currentPath = window.location.pathname;
+                const basePath = currentPath.substring(0, currentPath.lastIndexOf('/'));
+                window.location.href = `${basePath}/lawyer.html`;
             } else {
                 tg.sendData(JSON.stringify({
                     service: service,
