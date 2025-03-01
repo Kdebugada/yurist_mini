@@ -13,6 +13,7 @@
             color: var(--tg-theme-text-color, #000);
             min-height: 100vh;
             margin: 0;
+            overflow-x: hidden; /* Предотвращаем горизонтальную прокрутку */
         }
         .container {
             max-width: 450px;
@@ -22,6 +23,11 @@
         .header {
             text-align: center;
             margin-bottom: 15px;
+            animation: slideIn 0.8s ease-out;
+        }
+        @keyframes slideIn {
+            from { transform: translateY(-20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
         }
         .header h1 {
             font-size: 22px;
@@ -36,6 +42,21 @@
             padding: 15px;
             border-radius: 12px;
             backdrop-filter: blur(5px);
+            animation: fadeInUp 0.8s ease-out forwards;
+            opacity: 0;
+        }
+        .slider-container:nth-child(2) {
+            animation-delay: 0.1s;
+        }
+        .slider-container:nth-child(3) {
+            animation-delay: 0.2s;
+        }
+        .slider-container:nth-child(4) {
+            animation-delay: 0.3s;
+        }
+        @keyframes fadeInUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
         }
         .slider-label {
             display: block;
@@ -50,6 +71,7 @@
             font-weight: 600;
             font-size: 16px;
             color: var(--tg-theme-button-color, #3390ec);
+            transition: all 0.3s ease;
         }
         .range-slider {
             -webkit-appearance: none;
@@ -59,6 +81,10 @@
             background: rgba(0, 0, 0, 0.1);
             outline: none;
             margin: 10px 0;
+            transition: all 0.3s ease;
+        }
+        .range-slider:hover {
+            height: 10px;
         }
         .range-slider::-webkit-slider-thumb {
             -webkit-appearance: none;
@@ -69,6 +95,11 @@
             background: var(--tg-theme-button-color, #3390ec);
             cursor: pointer;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+        .range-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
         }
         .range-slider::-moz-range-thumb {
             width: 20px;
@@ -115,10 +146,25 @@
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             width: 100%;
             margin-top: 20px;
+            position: relative;
+            overflow: hidden;
+            animation: slideInLeft 0.6s ease-out forwards;
+            opacity: 0;
         }
-        .button:hover {
-            transform: scale(1.02);
-            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
+        .button::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: rgba(255, 255, 255, 0.1);
+            transform: rotate(30deg);
+            transition: transform 0.5s;
+            pointer-events: none;
+        }
+        .button:hover::after {
+            transform: rotate(30deg) translate(50%, 50%);
         }
         .button:active {
             transform: scale(0.98);
@@ -129,6 +175,20 @@
             color: var(--tg-theme-button-color, #3390ec);
             border: 1px solid var(--tg-theme-button-color, #3390ec);
             margin-top: 10px;
+            animation: slideInRight 0.6s ease-out forwards;
+            animation-delay: 0.1s;
+        }
+        @keyframes slideInLeft {
+            from { transform: translateX(-50px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes slideInRight {
+            from { transform: translateX(50px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        .range-slider:active + .range-values + .slider-value {
+            transform: scale(1.1);
+            font-weight: 700;
         }
     </style>
 </head>
@@ -183,7 +243,7 @@
             <div id="age-value" class="slider-value">20 лет</div>
         </div>
         
-        <button class="button" onclick="submitForm()">Отправить</button>
+        <button class="button" onclick="submitForm()">Рассчитать</button>
         <button class="button back-button" onclick="goBack()">Назад</button>
     </div>
 
