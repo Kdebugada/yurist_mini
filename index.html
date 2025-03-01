@@ -17,7 +17,7 @@
             flex-direction: column;
         }
         .grid {
-            display: none; /* Скрываем меню по умолчанию */
+            display: flex; /* Показываем сетку сразу */
             flex-direction: row;
             flex-wrap: wrap;
             gap: 8px;
@@ -116,8 +116,6 @@
     
     <img src="foto/index.jpg" alt="Наши услуги" class="hero-image">
     
-    <button class="button main-button" onclick="toggleServices()">УСЛУГИ</button>
-    
     <div class="grid" id="services-grid">
         <button class="button" onclick="handleClick('mortgage')">ИПОТЕКА</button>
         <button class="button" onclick="handleClick('visa')">ВИЗА</button>
@@ -134,17 +132,6 @@
         // Добавляем имя пользователя из Telegram
         if (tg.initDataUnsafe?.user?.first_name) {
             document.getElementById('username').textContent = tg.initDataUnsafe.user.first_name;
-        }
-        
-        function toggleServices() {
-            const servicesGrid = document.getElementById('services-grid');
-            
-            if (servicesGrid.style.display === 'none' || !servicesGrid.style.display) {
-                servicesGrid.style.display = 'flex';
-                servicesGrid.classList.add('fade-in');
-            } else {
-                servicesGrid.style.display = 'none';
-            }
         }
 
         function handleClick(service) {
