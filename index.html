@@ -24,6 +24,7 @@
             margin: 0 auto;
             padding: 0 10px;
             flex: 1;
+            display: none; /* Скрываем меню по умолчанию */
         }
         .button {
             padding: 10px 15px;
@@ -38,6 +39,19 @@
             transition: all 0.3s ease;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             width: 100%;
+        }
+        .main-button {
+            padding: 15px 25px;
+            font-size: 16px;
+            margin: 15px auto;
+            max-width: 200px;
+            display: block;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
         }
         .button:nth-child(odd),
         .button:nth-child(even) {
@@ -76,6 +90,22 @@
         .welcome-message p {
             margin: 5px 0;
         }
+        .hero-image {
+            width: 100%;
+            max-width: 450px;
+            height: auto;
+            border-radius: 15px;
+            margin: 10px auto;
+            display: block;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
     </style>
 </head>
 <body>
@@ -83,10 +113,15 @@
         <p>Добрый день, <span id="username">уважаемый клиент</span>!</p>
         <p>Если Вам нужна помощь по оформлению ипотеки и подбору недвижимости в Дубае, открытия визы, банковского счета, юридических услуг, открытия компании, заверению, переводов документов, нотариальные вопросы, любые виды доверенностей, консульство, договора купли продажи, выберите одну из услуг и далее в обратной форме оставьте свои контактные данные. Мы ответим Вам в течении 10 минут.</p>
     </div>
-    <div class="header">
+    
+    <img src="foto/index.jpg" alt="Наши услуги" class="hero-image">
+    
+    <button class="button main-button" onclick="toggleServices()">УСЛУГИ</button>
+    
+    <div class="header" id="services-header" style="display: none;">
         <h1>Выберите услугу</h1>
     </div>
-    <div class="grid">
+    <div class="grid" id="services-grid">
         <button class="button" onclick="handleClick('mortgage')">ИПОТЕКА</button>
         <button class="button" onclick="handleClick('visa')">ВИЗА</button>
         <button class="button" onclick="handleClick('bank')">СЧЕТ В БАНКЕ</button>
@@ -102,6 +137,21 @@
         // Добавляем имя пользователя из Telegram
         if (tg.initDataUnsafe?.user?.first_name) {
             document.getElementById('username').textContent = tg.initDataUnsafe.user.first_name;
+        }
+        
+        function toggleServices() {
+            const servicesGrid = document.getElementById('services-grid');
+            const servicesHeader = document.getElementById('services-header');
+            
+            if (servicesGrid.style.display === 'none' || !servicesGrid.style.display) {
+                servicesGrid.style.display = 'flex';
+                servicesHeader.style.display = 'block';
+                servicesGrid.classList.add('fade-in');
+                servicesHeader.classList.add('fade-in');
+            } else {
+                servicesGrid.style.display = 'none';
+                servicesHeader.style.display = 'none';
+            }
         }
 
         function handleClick(service) {
