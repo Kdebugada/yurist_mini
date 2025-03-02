@@ -746,25 +746,29 @@
                     document.getElementById('email-contact').value = '';
                     document.getElementById('message').value = '';
                     
-                    // Отправляем данные в Telegram WebApp с небольшой задержкой
-                    // и без закрытия приложения
+                    // Сохраняем данные в localStorage
+                    localStorage.setItem('last_submission', JSON.stringify(data));
+                    
+                    // Используем MainButton для обратной связи
+                    tg.MainButton.setText('Заявка отправлена ✅');
+                    tg.MainButton.show();
+                    
+                    // Скрываем кнопку через 3 секунды
                     setTimeout(() => {
-                        try {
-                            // Используем MainButton вместо sendData
-                            tg.MainButton.setText('Отправлено!');
-                            tg.MainButton.show();
-                            
-                            // Скрываем кнопку через 3 секунды
-                            setTimeout(() => {
-                                tg.MainButton.hide();
-                            }, 3000);
-                            
-                            // Сохраняем данные в localStorage для возможного использования
-                            localStorage.setItem('last_submission', JSON.stringify(data));
-                        } catch (e) {
-                            console.error('Error with Telegram WebApp:', e);
-                        }
-                    }, 500);
+                        tg.MainButton.hide();
+                    }, 3000);
+                    
+                    // Добавляем кнопку "Вернуться на главную"
+                    const backButton = document.createElement('button');
+                    backButton.className = 'button';
+                    backButton.textContent = 'Вернуться на главную';
+                    backButton.onclick = function() {
+                        window.location.href = 'index.html';
+                    };
+                    
+                    // Добавляем кнопку после существующих кнопок
+                    const buttonContainer = document.querySelector('.button-container');
+                    buttonContainer.appendChild(backButton);
                 }
             } catch (error) {
                 console.error('Error submitting form:', error);
