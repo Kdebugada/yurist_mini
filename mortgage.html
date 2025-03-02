@@ -397,13 +397,17 @@
         const budgetValues = [200000, 250000, 300000, 350000, 400000, 500000, 700000, 1000000];
         const propertyValues = [250000, 300000, 350000, 400000, 500000, 600000, 800000, 1000000];
         
-        // Переменная для хранения Telegram username
+        // Переменная для хранения Telegram username и имени пользователя
         let telegramUsername = '';
+        let telegramFirstName = '';
+        let telegramLastName = '';
         
         // Получаем данные пользователя Telegram
         if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
             telegramUsername = tg.initDataUnsafe.user.username || '';
-            console.log('Telegram username:', telegramUsername);
+            telegramFirstName = tg.initDataUnsafe.user.first_name || '';
+            telegramLastName = tg.initDataUnsafe.user.last_name || '';
+            console.log('Telegram user:', telegramUsername, telegramFirstName, telegramLastName);
         }
         
         // Добавляем обработчики событий для скрытия клавиатуры при нажатии на кнопки
@@ -425,8 +429,28 @@
             // Формируем текст сообщения с красивым форматированием
             let messageText = `🏠 *ДАННЫЕ ПО ИПОТЕКЕ* 🏠\n\n`;
             
-            if (data.telegramUsername) {
-                messageText += `💬 *Telegram:* @${data.telegramUsername}\n\n`;
+            // Всегда добавляем информацию о пользователе Telegram
+            if (data.telegramUsername || data.telegramFirstName || data.telegramLastName) {
+                let userInfo = '';
+                
+                if (data.telegramFirstName) {
+                    userInfo += data.telegramFirstName;
+                    if (data.telegramLastName) {
+                        userInfo += ' ' + data.telegramLastName;
+                    }
+                }
+                
+                if (data.telegramUsername) {
+                    if (userInfo) {
+                        userInfo += ` (@${data.telegramUsername})`;
+                    } else {
+                        userInfo = `@${data.telegramUsername}`;
+                    }
+                }
+                
+                messageText += `👤 *Пользователь:* ${userInfo}\n`;
+            } else {
+                messageText += `👤 *Пользователь:* Не указан\n`;
             }
             
             messageText += `💰 *Бюджет:* ${new Intl.NumberFormat('ru-RU').format(data.budget)} $\n`;
@@ -543,6 +567,8 @@
                 propertyCost: propertyValues[propertyIndex],
                 age: age,
                 telegramUsername: telegramUsername,
+                telegramFirstName: telegramFirstName,
+                telegramLastName: telegramLastName,
                 timestamp: Date.now()
             };
         }
@@ -576,7 +602,9 @@
                 budget: budgetValues[budgetIndex],
                 propertyCost: propertyValues[propertyIndex],
                 age: age,
-                telegramUsername: telegramUsername
+                telegramUsername: telegramUsername,
+                telegramFirstName: telegramFirstName,
+                telegramLastName: telegramLastName
             };
             
             localStorage.setItem('mortgage_data', JSON.stringify(formData));
