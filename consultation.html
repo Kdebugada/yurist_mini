@@ -86,8 +86,16 @@
             border-radius: 8px;
             font-size: 14px;
             background-color: rgba(255, 255, 255, 0.8);
-            color: var(--tg-theme-text-color, #000);
+            color: #000000 !important;
             box-sizing: border-box;
+        }
+        .form-input::placeholder {
+            color: #666666;
+        }
+        .form-input:focus {
+            color: #000000;
+            outline: none;
+            border-color: var(--tg-theme-button-color, #3390ec);
         }
         .form-textarea {
             width: 100%;
@@ -96,10 +104,18 @@
             border-radius: 8px;
             font-size: 14px;
             background-color: rgba(255, 255, 255, 0.8);
-            color: var(--tg-theme-text-color, #000);
+            color: #000000 !important;
             box-sizing: border-box;
             min-height: 80px;
             resize: vertical;
+        }
+        .form-textarea::placeholder {
+            color: #666666;
+        }
+        .form-textarea:focus {
+            color: #000000;
+            outline: none;
+            border-color: var(--tg-theme-button-color, #3390ec);
         }
         .button-container {
             margin-top: 5px;
