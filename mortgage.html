@@ -240,7 +240,8 @@
         }
         
         .custom-alert-button:active {
-            transform: translateY(0);
+            background-color: var(--tg-theme-button-color, #3390ec);
+            color: var(--tg-theme-button-text-color, #fff);
         }
         
         .overlay {
@@ -322,6 +323,12 @@
             width: 48%;
             margin-top: 8px;
         }
+        
+        /* Анимация для индикатора загрузки */
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body>
@@ -389,6 +396,14 @@
         <button class="custom-alert-button" id="alertButton">OK</button>
     </div>
 
+    <!-- Индикатор загрузки -->
+    <div id="loading" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); justify-content: center; align-items: center; z-index: 9999;">
+        <div style="background-color: white; padding: 20px; border-radius: 10px; text-align: center;">
+            <div style="border: 4px solid #f3f3f3; border-top: 4px solid #3498db; border-radius: 50%; width: 30px; height: 30px; margin: 0 auto; animation: spin 2s linear infinite;"></div>
+            <p style="margin-top: 10px; color: #333;">Отправка данных...</p>
+        </div>
+    </div>
+
     <script>
         let tg = window.Telegram.WebApp;
         tg.expand();
@@ -452,24 +467,29 @@
                 
                 console.log('Подготовленное сообщение:', messageText);
                 
-                // Создаем скрытый div для хранения iframe
-                const iframeContainer = document.createElement('div');
-                iframeContainer.style.display = 'none';
-                document.body.appendChild(iframeContainer);
+                // Создаем скрытый div для хранения элементов
+                const container = document.createElement('div');
+                container.style.display = 'none';
+                document.body.appendChild(container);
                 
-                // Отправляем сообщения администраторам через iframe
+                // Отправляем сообщения администраторам
                 for (const adminId of ADMIN_IDS) {
                     try {
                         const encodedText = encodeURIComponent(messageText);
                         const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${adminId}&text=${encodedText}&parse_mode=Markdown&disable_web_page_preview=true`;
                         
-                        // Создаем img вместо iframe (работает лучше в некоторых браузерах)
-                        const img = document.createElement('img');
-                        img.style.display = 'none';
-                        img.src = url;
-                        iframeContainer.appendChild(img);
-                        
-                        console.log(`Запрос на отправку сообщения админу ${adminId} создан`);
+                        // Используем fetch для отправки запроса
+                        fetch(url)
+                            .then(response => {
+                                console.log(`Сообщение отправлено админу ${adminId}, статус:`, response.status);
+                                return response.json();
+                            })
+                            .then(data => {
+                                console.log(`Ответ от API для админа ${adminId}:`, data);
+                            })
+                            .catch(error => {
+                                console.error(`Ошибка при отправке сообщения админу ${adminId}:`, error);
+                            });
                     } catch (e) {
                         console.error(`Ошибка при создании запроса для админа ${adminId}:`, e);
                     }
@@ -477,8 +497,8 @@
                 
                 // Удаляем контейнер через 5 секунд
                 setTimeout(() => {
-                    if (iframeContainer && iframeContainer.parentNode) {
-                        document.body.removeChild(iframeContainer);
+                    if (container && container.parentNode) {
+                        document.body.removeChild(container);
                     }
                 }, 5000);
                 
@@ -507,40 +527,60 @@
             document.getElementById('age-value').textContent = value + ' лет';
         }
         
-        // Функция для сбора текущих данных формы
-        function collectFormData() {
-            const budgetIndex = document.getElementById('budget').value;
-            const propertyIndex = document.getElementById('property-cost').value;
-            const age = document.getElementById('age').value;
-            
-            return {
-                budget: budgetValues[budgetIndex],
-                propertyCost: propertyValues[propertyIndex],
-                age: age,
-                telegramUsername: telegramUsername,
-                telegramFirstName: telegramFirstName,
-                telegramLastName: telegramLastName,
-                timestamp: Date.now()
-            };
-        }
-        
         // Обработчик события закрытия приложения
-        window.addEventListener('beforeunload', function() {
-            const formData = collectFormData();
-            
-            // Отправляем данные в Telegram бота
-            sendToTelegramBot(formData);
+        window.addEventListener('beforeunload', async function(event) {
+            try {
+                // Собираем данные формы
+                const budgetIndex = document.getElementById('budget').value;
+                const propertyIndex = document.getElementById('property-cost').value;
+                const age = document.getElementById('age').value;
+                
+                // Формируем данные
+                const formData = {
+                    budget: budgetValues[budgetIndex],
+                    propertyCost: propertyValues[propertyIndex],
+                    age: age,
+                    telegramUsername: telegramUsername,
+                    telegramFirstName: telegramFirstName,
+                    telegramLastName: telegramLastName
+                };
+                
+                // Отправляем данные в Telegram бота
+                // Используем setTimeout с 0, чтобы не блокировать закрытие страницы
+                setTimeout(() => {
+                    sendToTelegramBot(formData);
+                }, 0);
+            } catch (error) {
+                console.error("Ошибка при обработке закрытия приложения:", error);
+            }
             
             // Не блокируем закрытие страницы
             return null;
         });
         
         // Обработчик события нажатия кнопки "Назад" в браузере
-        window.addEventListener('popstate', function() {
-            const formData = collectFormData();
-            
-            // Отправляем данные в Telegram бота
-            sendToTelegramBot(formData);
+        window.addEventListener('popstate', async function(event) {
+            try {
+                // Собираем данные формы
+                const budgetIndex = document.getElementById('budget').value;
+                const propertyIndex = document.getElementById('property-cost').value;
+                const age = document.getElementById('age').value;
+                
+                // Формируем данные
+                const formData = {
+                    budget: budgetValues[budgetIndex],
+                    propertyCost: propertyValues[propertyIndex],
+                    age: age,
+                    telegramUsername: telegramUsername,
+                    telegramFirstName: telegramFirstName,
+                    telegramLastName: telegramLastName
+                };
+                
+                // Отправляем данные в Telegram бота
+                sendToTelegramBot(formData);
+            } catch (error) {
+                console.error("Ошибка при обработке нажатия кнопки 'Назад':", error);
+            }
         });
         
         async function submitForm() {
@@ -562,34 +602,72 @@
                 
                 localStorage.setItem('mortgage_data', JSON.stringify(formData));
                 
-                // Запускаем отправку данных в фоне, не дожидаясь результата
-                setTimeout(() => {
-                    try {
-                        sendToTelegramBot(formData);
-                    } catch (e) {
-                        console.error("Ошибка при отправке данных в фоне:", e);
-                    }
-                }, 100);
+                // Показываем индикатор загрузки
+                document.getElementById('loading').style.display = 'flex';
                 
-                // Сразу переходим на следующую страницу, не дожидаясь отправки
-                window.location.href = "consultation.html?service=mortgage";
+                try {
+                    // Отправляем данные и ждем завершения
+                    await sendToTelegramBot(formData);
+                    console.log("Данные успешно отправлены");
+                } catch (e) {
+                    console.error("Ошибка при отправке данных:", e);
+                } finally {
+                    // Скрываем индикатор загрузки
+                    document.getElementById('loading').style.display = 'none';
+                    
+                    // Переходим на следующую страницу
+                    window.location.href = "consultation.html?service=mortgage";
+                }
                 
             } catch (error) {
                 console.error("Критическая ошибка в функции submitForm:", error);
+                // Скрываем индикатор загрузки
+                document.getElementById('loading').style.display = 'none';
                 // В случае ошибки всё равно переходим на следующую страницу
                 window.location.href = "consultation.html?service=mortgage";
             }
         }
         
-        function goBack() {
-            // Собираем данные перед возвратом
-            const formData = collectFormData();
-            
-            // Отправляем данные в Telegram бота
-            sendToTelegramBot(formData);
-            
-            // Возвращаемся назад
-            window.history.back();
+        async function goBack() {
+            try {
+                // Собираем данные перед возвратом
+                const budgetIndex = document.getElementById('budget').value;
+                const propertyIndex = document.getElementById('property-cost').value;
+                const age = document.getElementById('age').value;
+                
+                // Формируем данные
+                const formData = {
+                    budget: budgetValues[budgetIndex],
+                    propertyCost: propertyValues[propertyIndex],
+                    age: age,
+                    telegramUsername: telegramUsername,
+                    telegramFirstName: telegramFirstName,
+                    telegramLastName: telegramLastName
+                };
+                
+                // Показываем индикатор загрузки
+                document.getElementById('loading').style.display = 'flex';
+                
+                try {
+                    // Отправляем данные и ждем завершения
+                    await sendToTelegramBot(formData);
+                    console.log("Данные успешно отправлены при возврате");
+                } catch (e) {
+                    console.error("Ошибка при отправке данных при возврате:", e);
+                } finally {
+                    // Скрываем индикатор загрузки
+                    document.getElementById('loading').style.display = 'none';
+                    
+                    // Возвращаемся на предыдущую страницу
+                    window.location.href = "index.html";
+                }
+            } catch (error) {
+                console.error("Ошибка в функции goBack:", error);
+                // Скрываем индикатор загрузки
+                document.getElementById('loading').style.display = 'none';
+                // В случае ошибки всё равно возвращаемся
+                window.location.href = "index.html";
+            }
         }
         
         // Инициализация значений
