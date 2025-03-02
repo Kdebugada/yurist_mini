@@ -185,6 +185,11 @@
                 const currentPath = window.location.pathname;
                 const basePath = currentPath.substring(0, currentPath.lastIndexOf('/'));
                 window.location.href = `${basePath}/mortgage.html`;
+            } else if (service === 'visa') {
+                // Открываем страницу визы
+                const currentPath = window.location.pathname;
+                const basePath = currentPath.substring(0, currentPath.lastIndexOf('/'));
+                window.location.href = `${basePath}/visa.html`;
             } else {
                 tg.sendData(JSON.stringify({
                     service: service,
