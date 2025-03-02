@@ -212,11 +212,7 @@
             left: 10px;
             top: 50%;
             transform: translateY(-50%);
-            width: 20px;
-            height: 15px;
-            background-size: contain;
-            background-repeat: no-repeat;
-            background-position: center;
+            font-size: 18px;
         }
         
         .phone-input-container {
@@ -519,15 +515,23 @@
                 }
             }
             
+            // Функция для преобразования ISO кода страны в эмодзи флага
+            function getCountryFlagEmoji(countryCode) {
+                const codePoints = countryCode
+                    .toUpperCase()
+                    .split('')
+                    .map(char => 127397 + char.charCodeAt());
+                return String.fromCodePoint(...codePoints);
+            }
+            
             if (countryISO) {
-                // Используем прямую ссылку на изображение флага
-                countryFlag.style.backgroundImage = `url(https://flagcdn.com/w20/${countryISO}.png)`;
-                // Делаем флаг видимым
+                // Используем эмодзи флага вместо изображения
+                const flagEmoji = getCountryFlagEmoji(countryISO);
+                countryFlag.textContent = flagEmoji;
                 countryFlag.style.display = 'block';
-                console.log(`Установлен флаг для страны: ${countryISO}`);
+                console.log(`Установлен флаг для страны: ${countryISO} (${flagEmoji})`);
             } else {
-                countryFlag.style.backgroundImage = '';
-                // Если страна не определена, скрываем флаг
+                countryFlag.textContent = '';
                 countryFlag.style.display = 'none';
                 console.log('Страна не определена');
             }
