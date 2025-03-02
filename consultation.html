@@ -661,15 +661,23 @@
             // Отправляем данные в Telegram бота
             const sentToBot = await sendToTelegramBot(data);
             
-            // Отправляем данные в Telegram WebApp
-            tg.sendData(JSON.stringify(data));
-            
             // Показываем сообщение об успешной отправке
             if (sentToBot) {
                 alert('Ваша заявка успешно отправлена! Мы свяжемся с вами в ближайшее время.');
+                
+                // Очищаем форму после успешной отправки
+                document.getElementById('name').value = '';
+                document.getElementById('whatsapp').value = '';
+                document.getElementById('email-contact').value = '';
+                document.getElementById('message').value = '';
+                
+                // Возвращаемся на главную страницу вместо закрытия приложения
+                const currentPath = window.location.pathname;
+                const basePath = currentPath.substring(0, currentPath.lastIndexOf('/'));
+                window.location.href = `${basePath}/index.html`;
+            } else {
+                alert('Произошла ошибка при отправке заявки. Пожалуйста, попробуйте еще раз.');
             }
-            
-            tg.close();
         }
         
         // Проверка валидности email

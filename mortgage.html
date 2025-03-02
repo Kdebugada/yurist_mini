@@ -370,12 +370,16 @@
             localStorage.setItem('mortgage_data', JSON.stringify(formData));
             
             // Отправляем данные в Telegram бота
-            await sendToTelegramBot(formData);
+            const sentToBot = await sendToTelegramBot(formData);
             
             // Переходим на страницу обратной связи
-            const currentPath = window.location.pathname;
-            const basePath = currentPath.substring(0, currentPath.lastIndexOf('/'));
-            window.location.href = `${basePath}/consultation.html?service=mortgage`;
+            if (sentToBot) {
+                const currentPath = window.location.pathname;
+                const basePath = currentPath.substring(0, currentPath.lastIndexOf('/'));
+                window.location.href = `${basePath}/consultation.html?service=mortgage`;
+            } else {
+                alert('Произошла ошибка при отправке данных. Пожалуйста, попробуйте еще раз.');
+            }
         }
         
         function goBack() {
