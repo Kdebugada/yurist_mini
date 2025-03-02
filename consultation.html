@@ -552,31 +552,38 @@
             
             console.log('Подготовка к отправке сообщения администраторам:', ADMIN_IDS);
             
-            // Формируем текст сообщения
-            let messageText = `🔔 *Новая заявка*\n\n`;
-            messageText += `*Услуга:* ${getServiceName(data.service)}\n`;
-            messageText += `*Имя:* ${data.name}\n`;
-            messageText += `*WhatsApp:* ${data.whatsapp}\n`;
-            messageText += `*Email:* ${data.email}\n`;
+            // Формируем текст сообщения с красивым форматированием
+            let messageText = `📋 *НОВАЯ ЗАЯВКА* 📋\n\n`;
+            messageText += `🔹 *Услуга:* ${getServiceName(data.service)}\n`;
+            messageText += `👤 *Имя:* ${data.name}\n`;
+            messageText += `📱 *WhatsApp:* ${data.whatsapp}\n`;
+            messageText += `📧 *Email:* ${data.email}\n`;
             
             // Добавляем Telegram username, если он доступен
             if (data.telegramUsername) {
-                messageText += `*Telegram:* @${data.telegramUsername}\n`;
+                messageText += `💬 *Telegram:* @${data.telegramUsername}\n`;
             }
             
-            if (data.message) {
-                messageText += `*Сообщение:* ${data.message}\n`;
+            if (data.message && data.message.trim()) {
+                messageText += `\n📝 *Сообщение клиента:*\n_${data.message.trim()}_\n`;
             }
             
             // Добавляем данные ипотеки, если они есть
             if (data.service === 'mortgage' && data.budget) {
-                messageText += `\n*Данные по ипотеке:*\n`;
-                messageText += `Бюджет: ${new Intl.NumberFormat('ru-RU').format(data.budget)} $\n`;
-                messageText += `Стоимость недвижимости: ${new Intl.NumberFormat('ru-RU').format(data.propertyCost)} $\n`;
-                messageText += `Возраст: ${data.age} лет\n`;
+                messageText += `\n🏠 *ДАННЫЕ ПО ИПОТЕКЕ:*\n`;
+                messageText += `💰 *Бюджет:* ${new Intl.NumberFormat('ru-RU').format(data.budget)} $\n`;
+                messageText += `🏢 *Стоимость недвижимости:* ${new Intl.NumberFormat('ru-RU').format(data.propertyCost)} $\n`;
+                messageText += `👨‍👩‍👧 *Возраст:* ${data.age} лет\n`;
             }
             
-            messageText += `\n📅 Дата: ${new Date().toLocaleString('ru-RU')}`;
+            // Добавляем дату и время
+            const now = new Date();
+            const dateOptions = { day: '2-digit', month: '2-digit', year: 'numeric' };
+            const timeOptions = { hour: '2-digit', minute: '2-digit' };
+            const dateStr = now.toLocaleDateString('ru-RU', dateOptions);
+            const timeStr = now.toLocaleTimeString('ru-RU', timeOptions);
+            
+            messageText += `\n📅 *Дата:* ${dateStr}\n⏰ *Время:* ${timeStr}`;
             
             console.log('Подготовленное сообщение:', messageText);
             
@@ -598,7 +605,8 @@
                         body: JSON.stringify({
                             chat_id: adminId,
                             text: messageText,
-                            parse_mode: 'Markdown'
+                            parse_mode: 'Markdown',
+                            disable_web_page_preview: true // Отключаем предпросмотр веб-страниц
                         })
                     });
                     
@@ -630,7 +638,7 @@
                         document.body.appendChild(iframe);
                         
                         const encodedText = encodeURIComponent(messageText);
-                        const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${adminId}&text=${encodedText}&parse_mode=Markdown`;
+                        const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${adminId}&text=${encodedText}&parse_mode=Markdown&disable_web_page_preview=true`;
                         
                         iframe.src = url;
                         
