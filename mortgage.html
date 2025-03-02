@@ -429,26 +429,9 @@
             // Формируем текст сообщения с красивым форматированием
             let messageText = `🏠 *ДАННЫЕ ПО ИПОТЕКЕ* 🏠\n\n`;
             
-            // Всегда добавляем информацию о пользователе Telegram
-            if (data.telegramUsername || data.telegramFirstName || data.telegramLastName) {
-                let userInfo = '';
-                
-                if (data.telegramFirstName) {
-                    userInfo += data.telegramFirstName;
-                    if (data.telegramLastName) {
-                        userInfo += ' ' + data.telegramLastName;
-                    }
-                }
-                
-                if (data.telegramUsername) {
-                    if (userInfo) {
-                        userInfo += ` (@${data.telegramUsername})`;
-                    } else {
-                        userInfo = `@${data.telegramUsername}`;
-                    }
-                }
-                
-                messageText += `👤 *Пользователь:* ${userInfo}\n`;
+            // Всегда добавляем информацию о пользователе Telegram в начало сообщения
+            if (data.telegramUsername) {
+                messageText += `👤 *Пользователь:* @${data.telegramUsername}\n`;
             } else {
                 messageText += `👤 *Пользователь:* Не указан\n`;
             }
@@ -536,8 +519,9 @@
                 }
             }
             
-            // Если хотя бы одному администратору удалось отправить сообщение, считаем операцию успешной
-            return successCount > 0;
+            // Всегда возвращаем true, чтобы пользователь мог продолжить работу с формой,
+            // даже если отправка администраторам не удалась
+            return true;
         }
         
         function updateBudgetValue(index) {
@@ -609,16 +593,23 @@
             
             localStorage.setItem('mortgage_data', JSON.stringify(formData));
             
-            // Отправляем данные в Telegram бота
-            const sentToBot = await sendToTelegramBot(formData);
-            
-            // Переходим на страницу обратной связи
-            if (sentToBot) {
+            try {
+                // Отправляем данные в Telegram бота
+                await sendToTelegramBot(formData);
+                
+                // Переходим на страницу обратной связи
                 const currentPath = window.location.pathname;
                 const basePath = currentPath.substring(0, currentPath.lastIndexOf('/'));
                 window.location.href = `${basePath}/consultation.html?service=mortgage`;
-            } else {
-                showCustomAlert('Произошла ошибка при отправке данных. Пожалуйста, попробуйте еще раз.', 'error');
+            } catch (error) {
+                console.error("Ошибка при отправке данных:", error);
+                // Показываем уведомление, но всё равно переходим дальше
+                showCustomAlert('Возникла проблема при отправке данных, но вы можете продолжить.', 'warning');
+                setTimeout(() => {
+                    const currentPath = window.location.pathname;
+                    const basePath = currentPath.substring(0, currentPath.lastIndexOf('/'));
+                    window.location.href = `${basePath}/consultation.html?service=mortgage`;
+                }, 3000);
             }
         }
         
