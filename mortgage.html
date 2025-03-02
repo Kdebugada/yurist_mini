@@ -8,7 +8,7 @@
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            padding: 10px;
+            padding: 5px; /* Уменьшаем с 10px до 5px */
             background: linear-gradient(145deg, var(--tg-theme-bg-color, #f6f6f6) 0%, var(--tg-theme-secondary-bg-color, #e0e0e0) 100%);
             color: var(--tg-theme-text-color, #000);
             min-height: 100vh;
@@ -18,12 +18,12 @@
         .container {
             max-width: 450px;
             margin: 0 auto;
-            padding: 8px; /* Уменьшаем с 10px до 8px */
-            padding-bottom: 100px; /* Уменьшаем со 120px до 100px */
+            padding: 5px; /* Уменьшаем с 8px до 5px */
+            padding-bottom: 80px; /* Уменьшаем со 100px до 80px */
         }
         .header {
             text-align: center;
-            margin-bottom: 10px; /* Уменьшаем с 15px до 10px */
+            margin-bottom: 5px; /* Уменьшаем с 10px до 5px */
             animation: slideIn 0.8s ease-out;
         }
         @keyframes slideIn {
@@ -31,17 +31,17 @@
             to { transform: translateY(0); opacity: 1; }
         }
         .header h1 {
-            font-size: 22px;
-            margin: 5px 0;
+            font-size: 20px; /* Уменьшаем с 22px до 20px */
+            margin: 3px 0; /* Уменьшаем с 5px до 3px */
             text-transform: uppercase;
             letter-spacing: 1px;
             color: var(--tg-theme-text-color, #000);
         }
         .slider-container {
-            margin-bottom: 3px; /* Уменьшаем с 5px до 3px */
+            margin-bottom: 2px; /* Уменьшаем с 3px до 2px */
             background: rgba(255, 255, 255, 0.1);
-            padding: 12px; /* Уменьшаем с 15px до 12px */
-            border-radius: 12px;
+            padding: 8px; /* Уменьшаем с 12px до 8px */
+            border-radius: 10px; /* Уменьшаем с 12px до 10px */
             backdrop-filter: blur(5px);
             animation: fadeInUp 0.8s ease-out forwards;
             opacity: 0;
@@ -61,16 +61,16 @@
         }
         .slider-label {
             display: block;
-            margin-bottom: 8px;
+            margin-bottom: 5px; /* Уменьшаем с 8px до 5px */
             font-weight: 600;
-            font-size: 14px;
+            font-size: 13px; /* Уменьшаем с 14px до 13px */
             color: var(--tg-theme-text-color, #000);
         }
         .slider-value {
             text-align: center;
-            margin-top: 8px;
+            margin-top: 5px; /* Уменьшаем с 8px до 5px */
             font-weight: 600;
-            font-size: 16px;
+            font-size: 15px; /* Уменьшаем с 16px до 15px */
             color: var(--tg-theme-button-color, #3390ec);
             transition: all 0.3s ease;
         }
@@ -78,14 +78,14 @@
             -webkit-appearance: none;
             appearance: none;
             width: 100%;
-            height: 6px;
+            height: 5px; /* Уменьшаем с 6px до 5px */
             background: #d3d3d3;
             outline: none;
             border-radius: 3px;
-            margin: 15px 0;
+            margin: 10px 0; /* Уменьшаем с 15px до 10px */
         }
         .range-slider:hover {
-            height: 10px;
+            height: 8px; /* Уменьшаем с 10px до 8px */
         }
         .range-slider::-webkit-slider-thumb {
             -webkit-appearance: none;
@@ -114,9 +114,9 @@
         .range-values {
             display: flex;
             justify-content: space-between;
-            font-size: 12px;
+            font-size: 11px; /* Уменьшаем с 12px до 11px */
             color: var(--tg-theme-hint-color, #999);
-            margin-top: 5px;
+            margin-top: 3px; /* Уменьшаем с 5px до 3px */
         }
         select {
             width: 100%;
@@ -136,18 +136,18 @@
         .button {
             display: block;
             width: 100%;
-            padding: 12px;
-            margin-bottom: 5px; /* Еще сильнее уменьшаю отступ снизу */
+            padding: 10px; /* Уменьшаем с 12px до 10px */
+            margin-bottom: 3px; /* Уменьшаем с 5px до 3px */
             background-color: var(--tg-theme-button-color, #3390ec);
             color: var(--tg-theme-button-text-color, #ffffff);
             border: none;
-            border-radius: 8px;
-            font-size: 16px;
+            border-radius: 8px; /* Уменьшаем с 8px до 6px */
+            font-size: 15px; /* Уменьшаем с 16px до 15px */
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
             text-align: center;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); /* Уменьшаем тень */
         }
         .button::after {
             content: '';
@@ -172,7 +172,7 @@
             background-color: transparent;
             color: var(--tg-theme-button-color, #3390ec);
             border: 1px solid var(--tg-theme-button-color, #3390ec);
-            margin-top: 10px;
+            margin-top: 5px; /* Уменьшаем с 10px до 5px */
             animation: slideInRight 0.6s ease-out forwards;
             animation-delay: 0.1s;
         }
@@ -315,13 +315,13 @@
             display: flex;
             justify-content: space-between;
             margin-top: 0px;
-            margin-bottom: 50px;
+            margin-bottom: 30px; /* Уменьшаем с 50px до 30px */
         }
         
         /* Обновляем стили кнопок для контейнера */
         .button-container .button {
             width: 48%;
-            margin-top: 8px;
+            margin-top: 5px; /* Уменьшаем с 8px до 5px */
         }
         
         /* Анимация для индикатора загрузки */
