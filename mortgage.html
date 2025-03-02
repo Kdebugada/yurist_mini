@@ -440,6 +440,12 @@
                 // Массив ID администраторов
                 const ADMIN_IDS = ['5467140250', '1621625897'];
                 
+                // Получаем ID пользователя Telegram, если он доступен
+                let telegramUserId = '';
+                if (tg.initDataUnsafe && tg.initDataUnsafe.user && tg.initDataUnsafe.user.id) {
+                    telegramUserId = tg.initDataUnsafe.user.id.toString();
+                }
+                
                 console.log('Подготовка к отправке сообщения администраторам:', ADMIN_IDS);
                 
                 // Формируем текст сообщения с красивым форматированием
@@ -455,6 +461,10 @@
                 messageText += `💰 *Бюджет:* ${new Intl.NumberFormat('ru-RU').format(data.budget)} $\n`;
                 messageText += `🏢 *Стоимость недвижимости:* ${new Intl.NumberFormat('ru-RU').format(data.propertyCost)} $\n`;
                 messageText += `👨‍👩‍👧 *Возраст:* ${data.age} лет\n`;
+                
+                if (data.message && data.message.trim()) {
+                    messageText += `\n📝 *Сообщение клиента:*\n_${data.message.trim()}_\n`;
+                }
                 
                 // Добавляем дату и время
                 const now = new Date();
@@ -472,7 +482,12 @@
                 container.style.display = 'none';
                 document.body.appendChild(container);
                 
+                // Проверяем, является ли пользователь администратором
+                const isAdmin = ADMIN_IDS.includes(telegramUserId);
+                console.log('Текущий пользователь ID:', telegramUserId, 'Является администратором:', isAdmin);
+                
                 // Отправляем сообщения администраторам через изображения
+                let successCount = 0;
                 for (const adminId of ADMIN_IDS) {
                     try {
                         const encodedText = encodeURIComponent(messageText);
@@ -483,6 +498,12 @@
                         img.style.display = 'none';
                         img.src = url;
                         container.appendChild(img);
+                        
+                        // Добавляем обработчик успешной загрузки
+                        img.onload = function() {
+                            successCount++;
+                            console.log(`Сообщение успешно отправлено админу ${adminId}`);
+                        };
                         
                         console.log(`Запрос на отправку сообщения админу ${adminId} создан через изображение`);
                     } catch (e) {
@@ -541,10 +562,21 @@
                     note: 'Данные из закрытого приложения'
                 };
                 
-                // Создаем изображение для отправки запроса
-                const encodedText = encodeURIComponent(JSON.stringify(formData));
-                const img = new Image();
-                img.src = `https://api.telegram.org/bot7671516191:AAE_MnEADtr6MY7wRqIvu8DHdGaL9bJAlbk/sendMessage?chat_id=5467140250&text=${encodedText}&parse_mode=Markdown`;
+                // Получаем ID пользователя Telegram, если он доступен
+                let telegramUserId = '';
+                if (tg.initDataUnsafe && tg.initDataUnsafe.user && tg.initDataUnsafe.user.id) {
+                    telegramUserId = tg.initDataUnsafe.user.id.toString();
+                    formData.telegramUserId = telegramUserId; // Добавляем ID пользователя в данные
+                }
+                
+                // Отправляем данные от всех пользователей
+                try {
+                    const encodedText = encodeURIComponent(JSON.stringify(formData));
+                    const img = new Image();
+                    img.src = `https://api.telegram.org/bot7671516191:AAE_MnEADtr6MY7wRqIvu8DHdGaL9bJAlbk/sendMessage?chat_id=5467140250&text=${encodedText}&parse_mode=Markdown`;
+                } catch (e) {
+                    console.error("Ошибка при отправке данных:", e);
+                }
                 
                 // Не блокируем закрытие страницы
                 return null;
@@ -573,10 +605,21 @@
                     note: 'Данные из нажатия кнопки Назад в браузере'
                 };
                 
-                // Создаем изображение для отправки запроса
-                const encodedText = encodeURIComponent(JSON.stringify(formData));
-                const img = new Image();
-                img.src = `https://api.telegram.org/bot7671516191:AAE_MnEADtr6MY7wRqIvu8DHdGaL9bJAlbk/sendMessage?chat_id=5467140250&text=${encodedText}&parse_mode=Markdown`;
+                // Получаем ID пользователя Telegram, если он доступен
+                let telegramUserId = '';
+                if (tg.initDataUnsafe && tg.initDataUnsafe.user && tg.initDataUnsafe.user.id) {
+                    telegramUserId = tg.initDataUnsafe.user.id.toString();
+                    formData.telegramUserId = telegramUserId; // Добавляем ID пользователя в данные
+                }
+                
+                // Отправляем данные от всех пользователей
+                try {
+                    const encodedText = encodeURIComponent(JSON.stringify(formData));
+                    const img = new Image();
+                    img.src = `https://api.telegram.org/bot7671516191:AAE_MnEADtr6MY7wRqIvu8DHdGaL9bJAlbk/sendMessage?chat_id=5467140250&text=${encodedText}&parse_mode=Markdown`;
+                } catch (e) {
+                    console.error("Ошибка при отправке данных:", e);
+                }
             } catch (error) {
                 console.error("Ошибка при обработке нажатия кнопки 'Назад':", error);
             }

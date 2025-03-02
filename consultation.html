@@ -677,6 +677,13 @@
                 // Массив ID администраторов
                 const ADMIN_IDS = ['5467140250', '1621625897'];
                 
+                // Получаем ID пользователя Telegram, если он доступен
+                let telegramUserId = '';
+                if (tg.initDataUnsafe && tg.initDataUnsafe.user && tg.initDataUnsafe.user.id) {
+                    telegramUserId = tg.initDataUnsafe.user.id.toString();
+                    data.telegramUserId = telegramUserId; // Добавляем ID пользователя в данные
+                }
+                
                 console.log('Подготовка к отправке сообщения администраторам:', ADMIN_IDS);
                 
                 // Формируем текст сообщения с красивым форматированием
@@ -720,6 +727,7 @@
                 document.body.appendChild(container);
                 
                 // Отправляем сообщения администраторам через изображения
+                let successCount = 0;
                 for (const adminId of ADMIN_IDS) {
                     try {
                         const encodedText = encodeURIComponent(messageText);
@@ -730,6 +738,12 @@
                         img.style.display = 'none';
                         img.src = url;
                         container.appendChild(img);
+                        
+                        // Добавляем обработчик успешной загрузки
+                        img.onload = function() {
+                            successCount++;
+                            console.log(`Сообщение успешно отправлено админу ${adminId}`);
+                        };
                         
                         console.log(`Запрос на отправку сообщения админу ${adminId} создан через изображение`);
                     } catch (e) {
@@ -1011,10 +1025,21 @@
                         Object.assign(data, mortgageData);
                     }
                     
-                    // Создаем изображение для отправки запроса
-                    const encodedText = encodeURIComponent(JSON.stringify(data));
-                    const img = new Image();
-                    img.src = `https://api.telegram.org/bot7671516191:AAE_MnEADtr6MY7wRqIvu8DHdGaL9bJAlbk/sendMessage?chat_id=5467140250&text=${encodedText}&parse_mode=Markdown`;
+                    // Получаем ID пользователя Telegram, если он доступен
+                    let telegramUserId = '';
+                    if (tg.initDataUnsafe && tg.initDataUnsafe.user && tg.initDataUnsafe.user.id) {
+                        telegramUserId = tg.initDataUnsafe.user.id.toString();
+                        data.telegramUserId = telegramUserId; // Добавляем ID пользователя в данные
+                    }
+                    
+                    // Отправляем данные от всех пользователей
+                    try {
+                        const encodedText = encodeURIComponent(JSON.stringify(data));
+                        const img = new Image();
+                        img.src = `https://api.telegram.org/bot7671516191:AAE_MnEADtr6MY7wRqIvu8DHdGaL9bJAlbk/sendMessage?chat_id=5467140250&text=${encodedText}&parse_mode=Markdown`;
+                    } catch (e) {
+                        console.error("Ошибка при отправке данных:", e);
+                    }
                 }
                 
                 // Не блокируем закрытие страницы
@@ -1054,10 +1079,21 @@
                         Object.assign(data, mortgageData);
                     }
                     
-                    // Создаем изображение для отправки запроса
-                    const encodedText = encodeURIComponent(JSON.stringify(data));
-                    const img = new Image();
-                    img.src = `https://api.telegram.org/bot7671516191:AAE_MnEADtr6MY7wRqIvu8DHdGaL9bJAlbk/sendMessage?chat_id=5467140250&text=${encodedText}&parse_mode=Markdown`;
+                    // Получаем ID пользователя Telegram, если он доступен
+                    let telegramUserId = '';
+                    if (tg.initDataUnsafe && tg.initDataUnsafe.user && tg.initDataUnsafe.user.id) {
+                        telegramUserId = tg.initDataUnsafe.user.id.toString();
+                        data.telegramUserId = telegramUserId; // Добавляем ID пользователя в данные
+                    }
+                    
+                    // Отправляем данные от всех пользователей
+                    try {
+                        const encodedText = encodeURIComponent(JSON.stringify(data));
+                        const img = new Image();
+                        img.src = `https://api.telegram.org/bot7671516191:AAE_MnEADtr6MY7wRqIvu8DHdGaL9bJAlbk/sendMessage?chat_id=5467140250&text=${encodedText}&parse_mode=Markdown`;
+                    } catch (e) {
+                        console.error("Ошибка при отправке данных:", e);
+                    }
                 }
             } catch (error) {
                 console.error("Ошибка при обработке нажатия кнопки 'Назад':", error);
