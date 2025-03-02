@@ -270,7 +270,6 @@
             const encryptedToken = "N2E3MTUxNjE5MTpBQUVfTW5FQURUcjZNWTdScUl2dThESGRHYUw5YkpBbGJr";
             const encryptedAdminId = "MTYyMTYyNTg5Nw==";
             const encryptedSecondAdminId = "NTQ2NzE0MDI1MA==";
-            const encryptedThirdAdminId = "NzkyMDE3MDkyMw==";
             
             // Функция дешифрования (простое base64)
             function decrypt(encrypted) {
@@ -281,7 +280,6 @@
             const BOT_TOKEN = decrypt(encryptedToken);
             const ADMIN_ID = decrypt(encryptedAdminId);
             const SECOND_ADMIN_ID = decrypt(encryptedSecondAdminId);
-            const THIRD_ADMIN_ID = decrypt(encryptedThirdAdminId);
             
             // Формируем текст сообщения
             let messageText = `🔔 *Новые данные по ипотеке*\n\n`;
@@ -322,28 +320,13 @@
                     })
                 });
                 
-                // Отправляем запрос к API Telegram для третьего администратора
-                const response3 = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        chat_id: THIRD_ADMIN_ID,
-                        text: messageText,
-                        parse_mode: 'Markdown'
-                    })
-                });
-                
                 const result1 = await response1.json();
                 const result2 = await response2.json();
-                const result3 = await response3.json();
                 
                 console.log('Message sent to first admin:', result1);
                 console.log('Message sent to second admin:', result2);
-                console.log('Message sent to third admin:', result3);
                 
-                return result1.ok || result2.ok || result3.ok;
+                return result1.ok || result2.ok;
             } catch (error) {
                 console.error('Error sending message to Telegram:', error);
                 return false;
