@@ -276,6 +276,7 @@
         tg.expand();
         
         let serviceType = '';
+        let telegramUsername = '';
         
         // Коды стран и их флаги
         const countryCodes = {
@@ -475,6 +476,12 @@
         window.onload = function() {
             serviceType = getServiceFromUrl();
             
+            // Получаем данные пользователя Telegram
+            if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
+                telegramUsername = tg.initDataUnsafe.user.username || '';
+                console.log('Telegram username:', telegramUsername);
+            }
+            
             // Если есть данные ипотеки в localStorage, получаем их
             if (serviceType === 'mortgage') {
                 const mortgageData = JSON.parse(localStorage.getItem('mortgage_data') || '{}');
@@ -548,6 +555,11 @@
             messageText += `*Имя:* ${data.name}\n`;
             messageText += `*WhatsApp:* ${data.whatsapp}\n`;
             messageText += `*Email:* ${data.email}\n`;
+            
+            // Добавляем Telegram username, если он доступен
+            if (data.telegramUsername) {
+                messageText += `*Telegram:* @${data.telegramUsername}\n`;
+            }
             
             if (data.message) {
                 messageText += `*Сообщение:* ${data.message}\n`;
@@ -633,6 +645,7 @@
                 whatsapp: whatsapp,
                 email: email,
                 message: message,
+                telegramUsername: telegramUsername,
                 timestamp: Date.now()
             };
             
