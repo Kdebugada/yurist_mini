@@ -190,6 +190,90 @@
             transform: scale(1.1);
             font-weight: 700;
         }
+        
+        /* Стили для кастомных уведомлений */
+        .custom-alert {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.9);
+            background-color: var(--tg-theme-bg-color, #ffffff);
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            max-width: 85%;
+            text-align: center;
+            animation: zoomIn 0.3s ease-out forwards;
+            display: none;
+            opacity: 0;
+        }
+        
+        .custom-alert-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+            display: block;
+        }
+        
+        .custom-alert-content {
+            margin-bottom: 20px;
+            font-size: 16px;
+            color: var(--tg-theme-text-color, #000);
+            line-height: 1.4;
+        }
+        
+        .custom-alert-button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            background-color: var(--tg-theme-button-color, #3390ec);
+            color: var(--tg-theme-button-text-color, #ffffff);
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            width: 100%;
+            max-width: 200px;
+        }
+        
+        .custom-alert-button:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+        
+        .custom-alert-button:active {
+            transform: translateY(0);
+        }
+        
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(3px);
+            z-index: 999;
+            display: none;
+            opacity: 0;
+            animation: fadeIn 0.3s ease-out forwards;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes zoomIn {
+            from { 
+                opacity: 0; 
+                transform: translate(-50%, -50%) scale(0.8);
+            }
+            to { 
+                opacity: 1; 
+                transform: translate(-50%, -50%) scale(1);
+            }
+        }
     </style>
 </head>
 <body>
@@ -245,6 +329,14 @@
         
         <button class="button" onclick="submitForm()">Далее</button>
         <button class="button back-button" onclick="goBack()">Назад</button>
+    </div>
+
+    <!-- Кастомное уведомление -->
+    <div class="overlay" id="overlay"></div>
+    <div class="custom-alert" id="customAlert">
+        <div class="custom-alert-icon" id="alertIcon">⚠️</div>
+        <div class="custom-alert-content" id="alertContent"></div>
+        <button class="custom-alert-button" id="alertButton">OK</button>
     </div>
 
     <script>
@@ -440,7 +532,7 @@
                 const basePath = currentPath.substring(0, currentPath.lastIndexOf('/'));
                 window.location.href = `${basePath}/consultation.html?service=mortgage`;
             } else {
-                alert('Произошла ошибка при отправке данных. Пожалуйста, попробуйте еще раз.');
+                showCustomAlert('Произошла ошибка при отправке данных. Пожалуйста, попробуйте еще раз.', 'error');
             }
         }
         
@@ -459,6 +551,50 @@
         updateBudgetValue(0);
         updatePropertyValue(0);
         updateAgeValue(20);
+        
+        // Функция для показа кастомного уведомления
+        function showCustomAlert(message, type = 'info') {
+            const overlay = document.getElementById('overlay');
+            const customAlert = document.getElementById('customAlert');
+            const alertContent = document.getElementById('alertContent');
+            const alertButton = document.getElementById('alertButton');
+            const alertIcon = document.getElementById('alertIcon');
+            
+            // Устанавливаем иконку в зависимости от типа уведомления
+            if (type === 'success') {
+                alertIcon.textContent = '✅';
+            } else if (type === 'error') {
+                alertIcon.textContent = '❌';
+            } else if (type === 'warning') {
+                alertIcon.textContent = '⚠️';
+            } else {
+                alertIcon.textContent = 'ℹ️';
+            }
+            
+            alertContent.textContent = message;
+            overlay.style.display = 'block';
+            customAlert.style.display = 'block';
+            
+            // Сбрасываем анимацию
+            overlay.style.animation = 'none';
+            customAlert.style.animation = 'none';
+            
+            // Запускаем анимацию
+            setTimeout(() => {
+                overlay.style.animation = 'fadeIn 0.3s ease-out forwards';
+                customAlert.style.animation = 'zoomIn 0.3s ease-out forwards';
+            }, 10);
+            
+            alertButton.onclick = function() {
+                overlay.style.opacity = '0';
+                customAlert.style.opacity = '0';
+                
+                setTimeout(() => {
+                    overlay.style.display = 'none';
+                    customAlert.style.display = 'none';
+                }, 300);
+            };
+        }
     </script>
 </body>
 </html> 
