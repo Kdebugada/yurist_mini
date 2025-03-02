@@ -135,7 +135,7 @@
         }
         .button {
             display: block;
-            width: 48%;
+            width: 100%;
             padding: 12px;
             margin-bottom: 5px; /* Еще сильнее уменьшаю отступ снизу */
             background-color: var(--tg-theme-button-color, #3390ec);
@@ -172,7 +172,7 @@
             background-color: transparent;
             color: var(--tg-theme-button-color, #3390ec);
             border: 1px solid var(--tg-theme-button-color, #3390ec);
-            margin-top: 0px;
+            margin-top: 10px;
             animation: slideInRight 0.6s ease-out forwards;
             animation-delay: 0.1s;
         }
@@ -313,7 +313,14 @@
         .button-container {
             display: flex;
             justify-content: space-between;
-            margin-top: 10px;
+            margin-top: 0px;
+            margin-bottom: 50px;
+        }
+        
+        /* Обновляем стили кнопок для контейнера */
+        .button-container .button {
+            width: 48%;
+            margin-top: 8px;
         }
     </style>
 </head>
