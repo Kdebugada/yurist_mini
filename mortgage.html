@@ -135,7 +135,7 @@
         }
         .button {
             display: block;
-            width: 100%;
+            width: 48%;
             padding: 12px;
             margin-bottom: 5px; /* Еще сильнее уменьшаю отступ снизу */
             background-color: var(--tg-theme-button-color, #3390ec);
@@ -172,7 +172,7 @@
             background-color: transparent;
             color: var(--tg-theme-button-color, #3390ec);
             border: 1px solid var(--tg-theme-button-color, #3390ec);
-            margin-top: 10px;
+            margin-top: 0px;
             animation: slideInRight 0.6s ease-out forwards;
             animation-delay: 0.1s;
         }
@@ -310,6 +310,11 @@
             outline: none;
             border-color: var(--tg-theme-button-color, #3390ec);
         }
+        .button-container {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+        }
     </style>
 </head>
 <body>
@@ -363,8 +368,10 @@
             <div id="age-value" class="slider-value">20 лет</div>
         </div>
         
-        <button class="button" onclick="submitForm()">Далее</button>
-        <button class="button back-button" onclick="goBack()">Назад</button>
+        <div class="button-container">
+            <button class="button" onclick="submitForm()">Далее</button>
+            <button class="button back-button" onclick="goBack()">Назад</button>
+        </div>
     </div>
 
     <!-- Кастомное уведомление -->
