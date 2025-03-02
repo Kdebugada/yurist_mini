@@ -545,6 +545,7 @@
         
         async function submitForm() {
             try {
+                // Собираем данные формы
                 const budgetIndex = document.getElementById('budget').value;
                 const propertyIndex = document.getElementById('property-cost').value;
                 const age = document.getElementById('age').value;
@@ -561,34 +562,22 @@
                 
                 localStorage.setItem('mortgage_data', JSON.stringify(formData));
                 
-                // Запускаем отправку данных, но не ждем результата
-                try {
-                    sendToTelegramBot(formData);
-                } catch (sendError) {
-                    console.error("Ошибка при отправке данных:", sendError);
-                    // Игнорируем ошибку и продолжаем
-                }
+                // Запускаем отправку данных в фоне, не дожидаясь результата
+                setTimeout(() => {
+                    try {
+                        sendToTelegramBot(formData);
+                    } catch (e) {
+                        console.error("Ошибка при отправке данных в фоне:", e);
+                    }
+                }, 100);
                 
-                // Переходим на страницу обратной связи
-                try {
-                    const currentPath = window.location.pathname;
-                    const basePath = currentPath.substring(0, currentPath.lastIndexOf('/'));
-                    const nextPage = `${basePath}/consultation.html?service=mortgage`;
-                    
-                    console.log("Переход на страницу:", nextPage);
-                    window.location.href = nextPage;
-                } catch (navError) {
-                    console.error("Ошибка при навигации:", navError);
-                    // Если даже навигация не работает, пробуем простой редирект
-                    window.location.href = "consultation.html?service=mortgage";
-                }
+                // Сразу переходим на следующую страницу, не дожидаясь отправки
+                window.location.href = "consultation.html?service=mortgage";
+                
             } catch (error) {
                 console.error("Критическая ошибка в функции submitForm:", error);
-                // Показываем уведомление, но всё равно переходим дальше через 3 секунды
-                showCustomAlert('Возникла проблема, но вы можете продолжить.', 'warning');
-                setTimeout(() => {
-                    window.location.href = "consultation.html?service=mortgage";
-                }, 3000);
+                // В случае ошибки всё равно переходим на следующую страницу
+                window.location.href = "consultation.html?service=mortgage";
             }
         }
         
