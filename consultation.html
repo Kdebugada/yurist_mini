@@ -686,58 +686,65 @@
         }
         
         async function submitForm() {
-            const name = document.getElementById('name').value;
-            const whatsapp = document.getElementById('whatsapp').value;
-            const email = document.getElementById('email-contact').value;
-            const message = document.getElementById('message').value;
-            
-            if (!name) {
-                alert('Пожалуйста, введите ваше имя');
-                return;
-            }
-            
-            if (!whatsapp) {
-                alert('Пожалуйста, введите номер WhatsApp');
-                return;
-            }
-            
-            if (!email) {
-                alert('Пожалуйста, введите email для связи');
-                return;
-            }
-            
-            // Проверка формата email
-            if (email && !isValidEmail(email)) {
-                alert('Пожалуйста, введите корректный email');
-                return;
-            }
-            
-            // Подготавливаем данные для отправки
-            const data = {
-                service: serviceType || 'consultation',
-                name: name,
-                whatsapp: whatsapp,
-                email: email,
-                message: message,
-                telegramUsername: telegramUsername,
-                timestamp: Date.now()
-            };
-            
-            // Если есть данные ипотеки, добавляем их
-            if (serviceType === 'mortgage') {
-                const mortgageData = JSON.parse(localStorage.getItem('mortgage_data') || '{}');
-                Object.assign(data, mortgageData);
-                
-                // Очищаем localStorage
-                localStorage.removeItem('mortgage_data');
-            }
-            
             try {
+                // Предотвращаем стандартное поведение формы
+                event.preventDefault();
+                
+                const name = document.getElementById('name').value;
+                const whatsapp = document.getElementById('whatsapp').value;
+                const email = document.getElementById('email-contact').value;
+                const message = document.getElementById('message').value;
+                
+                if (!name) {
+                    alert('Пожалуйста, введите ваше имя');
+                    return;
+                }
+                
+                if (!whatsapp) {
+                    alert('Пожалуйста, введите номер WhatsApp');
+                    return;
+                }
+                
+                if (!email) {
+                    alert('Пожалуйста, введите email для связи');
+                    return;
+                }
+                
+                // Проверка формата email
+                if (email && !isValidEmail(email)) {
+                    alert('Пожалуйста, введите корректный email');
+                    return;
+                }
+                
+                // Подготавливаем данные для отправки
+                const data = {
+                    service: serviceType || 'consultation',
+                    name: name,
+                    whatsapp: whatsapp,
+                    email: email,
+                    message: message,
+                    telegramUsername: telegramUsername,
+                    timestamp: Date.now()
+                };
+                
+                // Если есть данные ипотеки, добавляем их
+                if (serviceType === 'mortgage') {
+                    const mortgageData = JSON.parse(localStorage.getItem('mortgage_data') || '{}');
+                    Object.assign(data, mortgageData);
+                    
+                    // Очищаем localStorage
+                    localStorage.removeItem('mortgage_data');
+                }
+                
+                console.log('Отправка данных:', data);
+                
                 // Отправляем данные в Telegram бота
                 const sentToBot = await sendToTelegramBot(data);
                 
-                // Показываем красивое уведомление об успешной отправке
                 if (sentToBot) {
+                    console.log('Данные успешно отправлены боту');
+                    
+                    // Показываем красивое уведомление об успешной отправке
                     showSuccessMessage();
                     
                     // Очищаем форму
@@ -759,21 +766,32 @@
                     }, 3000);
                     
                     // Добавляем кнопку "Вернуться на главную"
-                    const backButton = document.createElement('button');
-                    backButton.className = 'button';
-                    backButton.textContent = 'Вернуться на главную';
-                    backButton.onclick = function() {
-                        window.location.href = 'index.html';
-                    };
-                    
-                    // Добавляем кнопку после существующих кнопок
                     const buttonContainer = document.querySelector('.button-container');
-                    buttonContainer.appendChild(backButton);
+                    
+                    // Проверяем, нет ли уже кнопки "Вернуться на главную"
+                    if (!document.getElementById('back-to-main-button')) {
+                        const backButton = document.createElement('button');
+                        backButton.className = 'button';
+                        backButton.id = 'back-to-main-button';
+                        backButton.textContent = 'Вернуться на главную';
+                        backButton.onclick = function() {
+                            window.location.href = 'index.html';
+                        };
+                        
+                        // Добавляем кнопку после существующих кнопок
+                        buttonContainer.appendChild(backButton);
+                    }
+                } else {
+                    console.error('Ошибка при отправке данных боту');
+                    alert('Произошла ошибка при отправке формы. Пожалуйста, попробуйте еще раз.');
                 }
             } catch (error) {
                 console.error('Error submitting form:', error);
                 alert('Произошла ошибка при отправке формы. Пожалуйста, попробуйте еще раз.');
             }
+            
+            // Возвращаем false, чтобы предотвратить стандартное поведение формы
+            return false;
         }
         
         // Проверка валидности email
