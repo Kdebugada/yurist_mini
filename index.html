@@ -190,6 +190,11 @@
                 const currentPath = window.location.pathname;
                 const basePath = currentPath.substring(0, currentPath.lastIndexOf('/'));
                 window.location.href = `${basePath}/visa.html`;
+            } else if (service === 'bank') {
+                // Открываем страницу банковского счета
+                const currentPath = window.location.pathname;
+                const basePath = currentPath.substring(0, currentPath.lastIndexOf('/'));
+                window.location.href = `${basePath}/bank.html`;
             } else {
                 tg.sendData(JSON.stringify({
                     service: service,
