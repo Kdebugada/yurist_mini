@@ -166,6 +166,7 @@
         <button class="button" style="--i:3" onclick="handleClick('bank')">СЧЕТ В БАНКЕ</button>
         <button class="button" style="--i:4" onclick="handleClick('lawyer')">ВАШ ЮРИСТ</button>
         <button class="button full-width-button" style="--i:5" onclick="handleClick('company')">ОТКРЫТЬ КОМПАНИЮ</button>
+        <button class="button full-width-button" style="--i:6" onclick="handleClick('consultation')">КОНСУЛЬТАЦИЯ</button>
     </div>
 
     <script>
@@ -203,6 +204,11 @@
                 const currentPath = window.location.pathname;
                 const basePath = currentPath.substring(0, currentPath.lastIndexOf('/'));
                 window.location.href = `${basePath}/company.html`;
+            } else if (service === 'consultation') {
+                // Открываем страницу консультации
+                const currentPath = window.location.pathname;
+                const basePath = currentPath.substring(0, currentPath.lastIndexOf('/'));
+                window.location.href = `${basePath}/consultation.html`;
             } else {
                 tg.sendData(JSON.stringify({
                     service: service,
