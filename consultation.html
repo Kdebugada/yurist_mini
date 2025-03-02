@@ -547,9 +547,10 @@
         // Функция для отправки сообщения в Telegram бота
         async function sendToTelegramBot(data) {
             const BOT_TOKEN = '7671516191:AAE_MnEADtr6MY7wRqIvu8DHdGaL9bJAlbk';
-            const ADMIN_ID = '5467140250';
+            // Массив ID администраторов
+            const ADMIN_IDS = ['5467140250', '1621625897'];
             
-            console.log('Подготовка к отправке сообщения администратору:', ADMIN_ID);
+            console.log('Подготовка к отправке сообщения администраторам:', ADMIN_IDS);
             
             // Формируем текст сообщения
             let messageText = `🔔 *Новая заявка*\n\n`;
@@ -579,67 +580,75 @@
             
             console.log('Подготовленное сообщение:', messageText);
             
-            try {
-                console.log('Отправка запроса к API Telegram...');
+            // Отправляем сообщение каждому администратору
+            let successCount = 0;
+            
+            for (const adminId of ADMIN_IDS) {
+                console.log(`Отправка сообщения администратору ${adminId}...`);
                 
-                // Отправляем запрос к API Telegram
-                const response = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        chat_id: ADMIN_ID,
-                        text: messageText,
-                        parse_mode: 'Markdown'
-                    })
-                });
-                
-                if (!response.ok) {
-                    console.error('Ошибка HTTP при отправке сообщения:', response.status, response.statusText);
-                    return false;
-                }
-                
-                const result = await response.json();
-                console.log('Ответ от API Telegram:', result);
-                
-                if (!result.ok) {
-                    console.error('API Telegram вернул ошибку:', result.description);
-                    return false;
-                }
-                
-                console.log('Сообщение успешно отправлено!');
-                return true;
-            } catch (error) {
-                console.error('Ошибка при отправке сообщения в Telegram:', error);
-                
-                // Попробуем альтернативный метод отправки через прокси
                 try {
-                    console.log('Пробуем отправить через альтернативный метод...');
+                    console.log('Отправка запроса к API Telegram...');
                     
-                    // Создаем элемент iframe, который будет загружать URL для отправки сообщения
-                    // Это может обойти некоторые ограничения CORS
-                    const iframe = document.createElement('iframe');
-                    iframe.style.display = 'none';
-                    document.body.appendChild(iframe);
+                    // Отправляем запрос к API Telegram
+                    const response = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            chat_id: adminId,
+                            text: messageText,
+                            parse_mode: 'Markdown'
+                        })
+                    });
                     
-                    const encodedText = encodeURIComponent(messageText);
-                    const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${ADMIN_ID}&text=${encodedText}&parse_mode=Markdown`;
+                    if (!response.ok) {
+                        console.error(`Ошибка HTTP при отправке сообщения админу ${adminId}:`, response.status, response.statusText);
+                        continue;
+                    }
                     
-                    iframe.src = url;
+                    const result = await response.json();
+                    console.log(`Ответ от API Telegram для админа ${adminId}:`, result);
                     
-                    // Удаляем iframe через 5 секунд
-                    setTimeout(() => {
-                        document.body.removeChild(iframe);
-                        console.log('Альтернативный метод отправки завершен');
-                    }, 5000);
+                    if (!result.ok) {
+                        console.error(`API Telegram вернул ошибку для админа ${adminId}:`, result.description);
+                        continue;
+                    }
                     
-                    return true; // Предполагаем, что сообщение отправлено
-                } catch (altError) {
-                    console.error('Ошибка при использовании альтернативного метода:', altError);
-                    return false;
+                    console.log(`Сообщение успешно отправлено админу ${adminId}!`);
+                    successCount++;
+                } catch (error) {
+                    console.error(`Ошибка при отправке сообщения админу ${adminId}:`, error);
+                    
+                    // Попробуем альтернативный метод отправки через прокси
+                    try {
+                        console.log(`Пробуем отправить через альтернативный метод админу ${adminId}...`);
+                        
+                        // Создаем элемент iframe, который будет загружать URL для отправки сообщения
+                        const iframe = document.createElement('iframe');
+                        iframe.style.display = 'none';
+                        document.body.appendChild(iframe);
+                        
+                        const encodedText = encodeURIComponent(messageText);
+                        const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${adminId}&text=${encodedText}&parse_mode=Markdown`;
+                        
+                        iframe.src = url;
+                        
+                        // Удаляем iframe через 5 секунд
+                        setTimeout(() => {
+                            document.body.removeChild(iframe);
+                            console.log(`Альтернативный метод отправки админу ${adminId} завершен`);
+                        }, 5000);
+                        
+                        successCount++;
+                    } catch (altError) {
+                        console.error(`Ошибка при использовании альтернативного метода для админа ${adminId}:`, altError);
+                    }
                 }
             }
+            
+            // Если хотя бы одному администратору удалось отправить сообщение, считаем операцию успешной
+            return successCount > 0;
         }
         
         // Получение названия услуги для сообщения
