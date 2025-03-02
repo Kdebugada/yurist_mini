@@ -260,6 +260,24 @@
         tg.expand();
         
         let selectedContactType = '';
+        let serviceType = '';
+        
+        // Получаем тип услуги из URL параметров
+        function getServiceFromUrl() {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get('service') || '';
+        }
+        
+        // Инициализация при загрузке страницы
+        window.onload = function() {
+            serviceType = getServiceFromUrl();
+            
+            // Если есть данные ипотеки в localStorage, получаем их
+            if (serviceType === 'mortgage') {
+                const mortgageData = JSON.parse(localStorage.getItem('mortgage_data') || '{}');
+                console.log('Mortgage data:', mortgageData);
+            }
+        };
         
         function selectContact(type) {
             selectedContactType = type;
@@ -298,15 +316,26 @@
                 return;
             }
             
-            tg.sendData(JSON.stringify({
-                service: 'consultation',
+            // Подготавливаем данные для отправки
+            const data = {
+                service: serviceType || 'consultation',
                 name: name,
                 contactType: selectedContactType,
                 contact: contact,
                 message: message,
                 timestamp: Date.now()
-            }));
+            };
             
+            // Если есть данные ипотеки, добавляем их
+            if (serviceType === 'mortgage') {
+                const mortgageData = JSON.parse(localStorage.getItem('mortgage_data') || '{}');
+                Object.assign(data, mortgageData);
+                
+                // Очищаем localStorage
+                localStorage.removeItem('mortgage_data');
+            }
+            
+            tg.sendData(JSON.stringify(data));
             tg.close();
         }
         

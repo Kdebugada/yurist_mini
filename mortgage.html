@@ -276,15 +276,17 @@
             const propertyIndex = document.getElementById('property-cost').value;
             const age = document.getElementById('age').value;
             
-            tg.sendData(JSON.stringify({
-                service: 'mortgage',
+            // Сохраняем данные в localStorage
+            localStorage.setItem('mortgage_data', JSON.stringify({
                 budget: budgetValues[budgetIndex],
                 propertyCost: propertyValues[propertyIndex],
-                age: age,
-                timestamp: Date.now()
+                age: age
             }));
             
-            tg.close();
+            // Переходим на страницу обратной связи
+            const currentPath = window.location.pathname;
+            const basePath = currentPath.substring(0, currentPath.lastIndexOf('/'));
+            window.location.href = `${basePath}/consultation.html?service=mortgage`;
         }
         
         function goBack() {

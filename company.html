@@ -187,12 +187,10 @@
         tg.expand();
         
         function submitForm() {
-            tg.sendData(JSON.stringify({
-                service: 'company',
-                timestamp: Date.now()
-            }));
-            
-            tg.close();
+            // Переходим на страницу обратной связи
+            const currentPath = window.location.pathname;
+            const basePath = currentPath.substring(0, currentPath.lastIndexOf('/'));
+            window.location.href = `${basePath}/consultation.html?service=company`;
         }
         
         function goBack() {
