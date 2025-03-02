@@ -38,10 +38,10 @@
             color: var(--tg-theme-text-color, #000);
         }
         .slider-container {
-            margin-bottom: 2px; /* Уменьшаем с 3px до 2px */
+            margin-bottom: 0px; /* Убираем отступ снизу */
             background: rgba(255, 255, 255, 0.1);
-            padding: 8px; /* Уменьшаем с 12px до 8px */
-            border-radius: 10px; /* Уменьшаем с 12px до 10px */
+            padding: 8px;
+            border-radius: 10px;
             backdrop-filter: blur(5px);
             animation: fadeInUp 0.8s ease-out forwards;
             opacity: 0;
@@ -315,7 +315,7 @@
             display: flex;
             justify-content: space-between;
             margin-top: 0px;
-            margin-bottom: 30px; /* Уменьшаем с 50px до 30px */
+            margin-bottom: 0px; /* Убираем отступ снизу */
         }
         
         /* Обновляем стили кнопок для контейнера */
@@ -328,6 +328,17 @@
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
+        }
+        .info-text {
+            font-size: 14px;
+            line-height: 1.4;
+            margin-bottom: 0px; /* Убираем отступ снизу */
+            background: rgba(255, 255, 255, 0.1);
+            padding: 4px;
+            border-radius: 8px;
+            backdrop-filter: blur(5px);
+            animation: fadeInUp 0.8s ease-out;
+            flex: 0 0 auto;
         }
     </style>
 </head>
