@@ -19,6 +19,7 @@
             max-width: 450px;
             margin: 0 auto;
             padding: 10px;
+            padding-bottom: 120px; /* Увеличиваю отступ снизу для предотвращения перекрытия клавиатурой */
         }
         .header {
             text-align: center;
@@ -133,23 +134,20 @@
             background-size: 1em;
         }
         .button {
-            padding: 12px 20px;
-            border: none;
-            border-radius: 10px;
+            display: block;
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 15px;
             background-color: var(--tg-theme-button-color, #3390ec);
             color: var(--tg-theme-button-text-color, #ffffff);
+            border: none;
+            border-radius: 8px;
             font-size: 16px;
             font-weight: 600;
             cursor: pointer;
-            text-align: center;
             transition: all 0.3s ease;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            width: 100%;
-            margin-top: 20px;
-            position: relative;
-            overflow: hidden;
-            animation: slideInLeft 0.6s ease-out forwards;
-            opacity: 0;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
         .button::after {
             content: '';
@@ -393,6 +391,14 @@
             telegramUsername = tg.initDataUnsafe.user.username || '';
             console.log('Telegram username:', telegramUsername);
         }
+        
+        // Добавляем обработчики событий для скрытия клавиатуры при нажатии на кнопки
+        document.querySelectorAll('.button').forEach(button => {
+            button.addEventListener('touchstart', function() {
+                // Снимаем фокус с активного элемента для скрытия клавиатуры
+                document.activeElement.blur();
+            });
+        });
         
         // Функция для отправки данных в Telegram бота
         async function sendToTelegramBot(data) {

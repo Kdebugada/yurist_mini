@@ -20,9 +20,10 @@
             justify-content: center;
         }
         .container {
-            max-width: 450px;
+            max-width: 600px;
             margin: 0 auto;
-            padding: 15px;
+            padding: 20px;
+            padding-bottom: 120px;
             display: flex;
             flex-direction: column;
             background-color: rgba(255, 255, 255, 0.1);
@@ -118,8 +119,10 @@
             border-color: var(--tg-theme-button-color, #3390ec);
         }
         .button-container {
-            margin-top: 5px;
-            flex: 0 0 auto;
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+            margin-bottom: 50px;
         }
         .button {
             padding: 10px 15px;
@@ -343,25 +346,25 @@
         <div class="form-container">
             <div class="form-group">
                 <label class="form-label required-field" for="name">Ваше имя</label>
-                <input type="text" id="name" class="form-input" placeholder="Введите ваше имя">
+                <input type="text" id="name" class="form-input" placeholder="Введите ваше имя" onfocus="scrollToField(this)">
             </div>
             
             <div class="form-group">
                 <label class="form-label required-field" for="whatsapp">WhatsApp</label>
                 <div id="whatsapp-container" class="phone-input-container">
                     <div id="whatsapp-flag" class="country-flag"></div>
-                    <input type="tel" id="whatsapp" class="form-input phone-input" placeholder="Введите номер WhatsApp" oninput="detectCountry('whatsapp')">
+                    <input type="tel" id="whatsapp" class="form-input phone-input" placeholder="Введите номер WhatsApp" oninput="detectCountry('whatsapp')" onfocus="scrollToField(this)">
                 </div>
             </div>
             
             <div class="form-group">
                 <label class="form-label required-field" for="email-contact">Email</label>
-                <input type="email" id="email-contact" class="form-input" placeholder="Введите email для связи">
+                <input type="email" id="email-contact" class="form-input" placeholder="Введите email для связи" onfocus="scrollToField(this)">
             </div>
             
             <div class="form-group">
                 <label class="form-label" for="message">Ваш вопрос</label>
-                <textarea id="message" class="form-textarea" placeholder="Опишите ваш вопрос или запрос"></textarea>
+                <textarea id="message" class="form-textarea" placeholder="Опишите ваш вопрос или запрос" onfocus="scrollToField(this)"></textarea>
             </div>
         </div>
         
@@ -860,6 +863,32 @@
         function goBack() {
             window.history.back();
         }
+        
+        // Функция для прокрутки страницы при фокусе на поле ввода
+        function scrollToField(element) {
+            // Небольшая задержка для корректной работы на мобильных устройствах
+            setTimeout(() => {
+                // Получаем позицию элемента относительно верха страницы
+                const rect = element.getBoundingClientRect();
+                const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+                const offsetTop = rect.top + scrollTop;
+                
+                // Прокручиваем страницу так, чтобы поле ввода было в верхней части экрана
+                // Это поможет избежать перекрытия клавиатурой
+                window.scrollTo({
+                    top: offsetTop - 100, // Отступ сверху для удобства
+                    behavior: 'smooth'
+                });
+            }, 300);
+        }
+        
+        // Добавляем обработчики событий для скрытия клавиатуры при нажатии на кнопки
+        document.querySelectorAll('.button').forEach(button => {
+            button.addEventListener('touchstart', function() {
+                // Снимаем фокус с активного элемента для скрытия клавиатуры
+                document.activeElement.blur();
+            });
+        });
         
         // Функция для показа кастомного уведомления
         function showCustomAlert(message, type = 'info') {
