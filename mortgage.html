@@ -255,6 +255,55 @@
         const budgetValues = [200000, 250000, 300000, 350000, 400000, 500000, 700000, 1000000];
         const propertyValues = [250000, 300000, 350000, 400000, 500000, 600000, 800000, 1000000];
         
+        // Переменная для хранения Telegram username
+        let telegramUsername = '';
+        
+        // Получаем данные пользователя Telegram
+        if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
+            telegramUsername = tg.initDataUnsafe.user.username || '';
+            console.log('Telegram username:', telegramUsername);
+        }
+        
+        // Функция для отправки данных в Telegram бота
+        async function sendToTelegramBot(data) {
+            const BOT_TOKEN = '7671516191:AAE_MnEADtr6MY7wRqIvu8DHdGaL9bJAlbk';
+            const ADMIN_ID = '1621625897';
+            
+            // Формируем текст сообщения
+            let messageText = `🔔 *Новые данные по ипотеке*\n\n`;
+            
+            if (data.telegramUsername) {
+                messageText += `*Telegram:* @${data.telegramUsername}\n\n`;
+            }
+            
+            messageText += `*Бюджет:* ${new Intl.NumberFormat('ru-RU').format(data.budget)} $\n`;
+            messageText += `*Стоимость недвижимости:* ${new Intl.NumberFormat('ru-RU').format(data.propertyCost)} $\n`;
+            messageText += `*Возраст:* ${data.age} лет\n`;
+            messageText += `\n📅 Дата: ${new Date().toLocaleString('ru-RU')}`;
+            
+            try {
+                // Отправляем запрос к API Telegram
+                const response = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        chat_id: ADMIN_ID,
+                        text: messageText,
+                        parse_mode: 'Markdown'
+                    })
+                });
+                
+                const result = await response.json();
+                console.log('Message sent to Telegram:', result);
+                return result.ok;
+            } catch (error) {
+                console.error('Error sending message to Telegram:', error);
+                return false;
+            }
+        }
+        
         function updateBudgetValue(index) {
             const value = budgetValues[index];
             const formattedValue = new Intl.NumberFormat('ru-RU').format(value);
@@ -271,17 +320,57 @@
             document.getElementById('age-value').textContent = value + ' лет';
         }
         
-        function submitForm() {
+        // Функция для сбора текущих данных формы
+        function collectFormData() {
+            const budgetIndex = document.getElementById('budget').value;
+            const propertyIndex = document.getElementById('property-cost').value;
+            const age = document.getElementById('age').value;
+            
+            return {
+                budget: budgetValues[budgetIndex],
+                propertyCost: propertyValues[propertyIndex],
+                age: age,
+                telegramUsername: telegramUsername,
+                timestamp: Date.now()
+            };
+        }
+        
+        // Обработчик события закрытия приложения
+        window.addEventListener('beforeunload', function() {
+            const formData = collectFormData();
+            
+            // Отправляем данные в Telegram бота
+            sendToTelegramBot(formData);
+            
+            // Не блокируем закрытие страницы
+            return null;
+        });
+        
+        // Обработчик события нажатия кнопки "Назад" в браузере
+        window.addEventListener('popstate', function() {
+            const formData = collectFormData();
+            
+            // Отправляем данные в Telegram бота
+            sendToTelegramBot(formData);
+        });
+        
+        async function submitForm() {
             const budgetIndex = document.getElementById('budget').value;
             const propertyIndex = document.getElementById('property-cost').value;
             const age = document.getElementById('age').value;
             
             // Сохраняем данные в localStorage
-            localStorage.setItem('mortgage_data', JSON.stringify({
+            const formData = {
                 budget: budgetValues[budgetIndex],
                 propertyCost: propertyValues[propertyIndex],
-                age: age
-            }));
+                age: age,
+                telegramUsername: telegramUsername
+            };
+            
+            localStorage.setItem('mortgage_data', JSON.stringify(formData));
+            
+            // Отправляем данные в Telegram бота
+            await sendToTelegramBot(formData);
             
             // Переходим на страницу обратной связи
             const currentPath = window.location.pathname;
@@ -290,6 +379,13 @@
         }
         
         function goBack() {
+            // Собираем данные перед возвратом
+            const formData = collectFormData();
+            
+            // Отправляем данные в Telegram бота
+            sendToTelegramBot(formData);
+            
+            // Возвращаемся назад
             window.history.back();
         }
         
