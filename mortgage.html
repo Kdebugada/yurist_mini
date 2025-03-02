@@ -266,8 +266,18 @@
         
         // Функция для отправки данных в Telegram бота
         async function sendToTelegramBot(data) {
-            const BOT_TOKEN = '7671516191:AAE_MnEADtr6MY7wRqIvu8DHdGaL9bJAlbk';
-            const ADMIN_ID = '1621625897';
+            // Зашифрованные данные
+            const encryptedToken = "N2E3MTUxNjE5MTpBQUVfTW5FQURUcjZNWTdScUl2dThESGRHYUw5YkpBbGJr";
+            const encryptedAdminId = "MTYyMTYyNTg5Nw==";
+            
+            // Функция дешифрования (простое base64)
+            function decrypt(encrypted) {
+                return atob(encrypted);
+            }
+            
+            // Дешифруем токен и ID администратора
+            const BOT_TOKEN = decrypt(encryptedToken);
+            const ADMIN_ID = decrypt(encryptedAdminId);
             
             // Формируем текст сообщения
             let messageText = `🔔 *Новые данные по ипотеке*\n\n`;
