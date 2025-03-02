@@ -736,9 +736,6 @@
                 // Отправляем данные в Telegram бота
                 const sentToBot = await sendToTelegramBot(data);
                 
-                // Отправляем данные в Telegram WebApp без закрытия приложения
-                tg.sendData(JSON.stringify(data));
-                
                 // Показываем красивое уведомление об успешной отправке
                 if (sentToBot) {
                     showSuccessMessage();
@@ -748,6 +745,26 @@
                     document.getElementById('whatsapp').value = '';
                     document.getElementById('email-contact').value = '';
                     document.getElementById('message').value = '';
+                    
+                    // Отправляем данные в Telegram WebApp с небольшой задержкой
+                    // и без закрытия приложения
+                    setTimeout(() => {
+                        try {
+                            // Используем MainButton вместо sendData
+                            tg.MainButton.setText('Отправлено!');
+                            tg.MainButton.show();
+                            
+                            // Скрываем кнопку через 3 секунды
+                            setTimeout(() => {
+                                tg.MainButton.hide();
+                            }, 3000);
+                            
+                            // Сохраняем данные в localStorage для возможного использования
+                            localStorage.setItem('last_submission', JSON.stringify(data));
+                        } catch (e) {
+                            console.error('Error with Telegram WebApp:', e);
+                        }
+                    }, 500);
                 }
             } catch (error) {
                 console.error('Error submitting form:', error);
