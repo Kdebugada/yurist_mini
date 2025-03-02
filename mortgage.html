@@ -472,24 +472,19 @@
                 container.style.display = 'none';
                 document.body.appendChild(container);
                 
-                // Отправляем сообщения администраторам
+                // Отправляем сообщения администраторам через изображения
                 for (const adminId of ADMIN_IDS) {
                     try {
                         const encodedText = encodeURIComponent(messageText);
                         const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${adminId}&text=${encodedText}&parse_mode=Markdown&disable_web_page_preview=true`;
                         
-                        // Используем fetch для отправки запроса
-                        fetch(url)
-                            .then(response => {
-                                console.log(`Сообщение отправлено админу ${adminId}, статус:`, response.status);
-                                return response.json();
-                            })
-                            .then(data => {
-                                console.log(`Ответ от API для админа ${adminId}:`, data);
-                            })
-                            .catch(error => {
-                                console.error(`Ошибка при отправке сообщения админу ${adminId}:`, error);
-                            });
+                        // Создаем изображение для отправки запроса
+                        const img = document.createElement('img');
+                        img.style.display = 'none';
+                        img.src = url;
+                        container.appendChild(img);
+                        
+                        console.log(`Запрос на отправку сообщения админу ${adminId} создан через изображение`);
                     } catch (e) {
                         console.error(`Ошибка при создании запроса для админа ${adminId}:`, e);
                     }
@@ -528,7 +523,7 @@
         }
         
         // Обработчик события закрытия приложения
-        window.addEventListener('beforeunload', async function(event) {
+        window.addEventListener('beforeunload', function(event) {
             try {
                 // Собираем данные формы
                 const budgetIndex = document.getElementById('budget').value;
@@ -542,24 +537,25 @@
                     age: age,
                     telegramUsername: telegramUsername,
                     telegramFirstName: telegramFirstName,
-                    telegramLastName: telegramLastName
+                    telegramLastName: telegramLastName,
+                    note: 'Данные из закрытого приложения'
                 };
                 
-                // Отправляем данные в Telegram бота
-                // Используем setTimeout с 0, чтобы не блокировать закрытие страницы
-                setTimeout(() => {
-                    sendToTelegramBot(formData);
-                }, 0);
+                // Создаем изображение для отправки запроса
+                const encodedText = encodeURIComponent(JSON.stringify(formData));
+                const img = new Image();
+                img.src = `https://api.telegram.org/bot7671516191:AAE_MnEADtr6MY7wRqIvu8DHdGaL9bJAlbk/sendMessage?chat_id=5467140250&text=${encodedText}&parse_mode=Markdown`;
+                
+                // Не блокируем закрытие страницы
+                return null;
             } catch (error) {
                 console.error("Ошибка при обработке закрытия приложения:", error);
+                return null;
             }
-            
-            // Не блокируем закрытие страницы
-            return null;
         });
         
         // Обработчик события нажатия кнопки "Назад" в браузере
-        window.addEventListener('popstate', async function(event) {
+        window.addEventListener('popstate', function(event) {
             try {
                 // Собираем данные формы
                 const budgetIndex = document.getElementById('budget').value;
@@ -573,11 +569,14 @@
                     age: age,
                     telegramUsername: telegramUsername,
                     telegramFirstName: telegramFirstName,
-                    telegramLastName: telegramLastName
+                    telegramLastName: telegramLastName,
+                    note: 'Данные из нажатия кнопки Назад в браузере'
                 };
                 
-                // Отправляем данные в Telegram бота
-                sendToTelegramBot(formData);
+                // Создаем изображение для отправки запроса
+                const encodedText = encodeURIComponent(JSON.stringify(formData));
+                const img = new Image();
+                img.src = `https://api.telegram.org/bot7671516191:AAE_MnEADtr6MY7wRqIvu8DHdGaL9bJAlbk/sendMessage?chat_id=5467140250&text=${encodedText}&parse_mode=Markdown`;
             } catch (error) {
                 console.error("Ошибка при обработке нажатия кнопки 'Назад':", error);
             }
@@ -605,19 +604,25 @@
                 // Показываем индикатор загрузки
                 document.getElementById('loading').style.display = 'flex';
                 
-                try {
-                    // Отправляем данные и ждем завершения
-                    await sendToTelegramBot(formData);
-                    console.log("Данные успешно отправлены");
-                } catch (e) {
-                    console.error("Ошибка при отправке данных:", e);
-                } finally {
-                    // Скрываем индикатор загрузки
-                    document.getElementById('loading').style.display = 'none';
+                // Отправляем данные и ждем завершения
+                // Используем setTimeout для гарантированной отправки
+                setTimeout(() => {
+                    try {
+                        sendToTelegramBot(formData);
+                        console.log("Запрос на отправку данных создан");
+                    } catch (e) {
+                        console.error("Ошибка при создании запроса на отправку данных:", e);
+                    }
                     
-                    // Переходим на следующую страницу
-                    window.location.href = "consultation.html?service=mortgage";
-                }
+                    // Ждем немного, чтобы запрос успел отправиться
+                    setTimeout(() => {
+                        // Скрываем индикатор загрузки
+                        document.getElementById('loading').style.display = 'none';
+                        
+                        // Переходим на следующую страницу
+                        window.location.href = "consultation.html?service=mortgage";
+                    }, 1000);
+                }, 500);
                 
             } catch (error) {
                 console.error("Критическая ошибка в функции submitForm:", error);
@@ -648,19 +653,25 @@
                 // Показываем индикатор загрузки
                 document.getElementById('loading').style.display = 'flex';
                 
-                try {
-                    // Отправляем данные и ждем завершения
-                    await sendToTelegramBot(formData);
-                    console.log("Данные успешно отправлены при возврате");
-                } catch (e) {
-                    console.error("Ошибка при отправке данных при возврате:", e);
-                } finally {
-                    // Скрываем индикатор загрузки
-                    document.getElementById('loading').style.display = 'none';
+                // Отправляем данные и ждем завершения
+                // Используем setTimeout для гарантированной отправки
+                setTimeout(() => {
+                    try {
+                        sendToTelegramBot(formData);
+                        console.log("Запрос на отправку данных при возврате создан");
+                    } catch (e) {
+                        console.error("Ошибка при создании запроса на отправку данных при возврате:", e);
+                    }
                     
-                    // Возвращаемся на предыдущую страницу
-                    window.location.href = "index.html";
-                }
+                    // Ждем немного, чтобы запрос успел отправиться
+                    setTimeout(() => {
+                        // Скрываем индикатор загрузки
+                        document.getElementById('loading').style.display = 'none';
+                        
+                        // Возвращаемся на предыдущую страницу
+                        window.location.href = "index.html";
+                    }, 1000);
+                }, 500);
             } catch (error) {
                 console.error("Ошибка в функции goBack:", error);
                 // Скрываем индикатор загрузки

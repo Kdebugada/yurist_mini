@@ -719,43 +719,19 @@
                 container.style.display = 'none';
                 document.body.appendChild(container);
                 
-                // Отправляем сообщения администраторам
-                let successCount = 0;
-                
+                // Отправляем сообщения администраторам через изображения
                 for (const adminId of ADMIN_IDS) {
                     try {
                         const encodedText = encodeURIComponent(messageText);
                         const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${adminId}&text=${encodedText}&parse_mode=Markdown&disable_web_page_preview=true`;
                         
-                        // Используем fetch для отправки запроса
-                        fetch(url)
-                            .then(response => {
-                                console.log(`Сообщение отправлено админу ${adminId}, статус:`, response.status);
-                                return response.json();
-                            })
-                            .then(data => {
-                                console.log(`Ответ от API для админа ${adminId}:`, data);
-                                successCount++;
-                            })
-                            .catch(error => {
-                                console.error(`Ошибка при отправке сообщения админу ${adminId}:`, error);
-                                
-                                // Пробуем альтернативный метод через img
-                                try {
-                                    console.log(`Пробуем отправить через альтернативный метод админу ${adminId}...`);
-                                    
-                                    // Создаем img элемент
-                                    const img = document.createElement('img');
-                                    img.style.display = 'none';
-                                    img.src = url;
-                                    container.appendChild(img);
-                                    
-                                    console.log(`Альтернативный метод отправки админу ${adminId} запущен`);
-                                    successCount++;
-                                } catch (altError) {
-                                    console.error(`Ошибка при использовании альтернативного метода для админа ${adminId}:`, altError);
-                                }
-                            });
+                        // Создаем изображение для отправки запроса
+                        const img = document.createElement('img');
+                        img.style.display = 'none';
+                        img.src = url;
+                        container.appendChild(img);
+                        
+                        console.log(`Запрос на отправку сообщения админу ${adminId} создан через изображение`);
                     } catch (e) {
                         console.error(`Ошибка при создании запроса для админа ${adminId}:`, e);
                     }
@@ -768,7 +744,7 @@
                     }
                 }, 5000);
                 
-                // Всегда возвращаем true, чтобы не блокировать пользовательский интерфейс
+                // Всегда возвращаем true
                 return true;
             } catch (error) {
                 console.error("Глобальная ошибка в функции sendToTelegramBot:", error);
@@ -817,31 +793,37 @@
                 return;
             }
             
-            // Подготавливаем данные для отправки
-            const data = {
-                service: serviceType || 'consultation',
-                name: name,
-                whatsapp: whatsapp,
-                email: email,
-                message: message,
-                telegramUsername: telegramUsername,
-                timestamp: Date.now()
-            };
+            // Показываем индикатор загрузки
+            document.getElementById('loading').style.display = 'flex';
             
-            // Если есть данные ипотеки, добавляем их
-            if (serviceType === 'mortgage') {
-                const mortgageData = JSON.parse(localStorage.getItem('mortgage_data') || '{}');
-                Object.assign(data, mortgageData);
+            try {
+                // Подготавливаем данные для отправки
+                const data = {
+                    service: serviceType || 'consultation',
+                    name: name,
+                    whatsapp: whatsapp,
+                    email: email,
+                    message: message,
+                    telegramUsername: telegramUsername,
+                    timestamp: Date.now()
+                };
                 
-                // Очищаем localStorage
-                localStorage.removeItem('mortgage_data');
-            }
-            
-            // Отправляем данные в Telegram бота
-            const sentToBot = await sendToTelegramBot(data);
-            
-            // Показываем сообщение об успешной отправке
-            if (sentToBot) {
+                // Если есть данные ипотеки, добавляем их
+                if (serviceType === 'mortgage') {
+                    const mortgageData = JSON.parse(localStorage.getItem('mortgage_data') || '{}');
+                    Object.assign(data, mortgageData);
+                    
+                    // Очищаем localStorage
+                    localStorage.removeItem('mortgage_data');
+                }
+                
+                // Отправляем данные в Telegram бота
+                await sendToTelegramBot(data);
+                
+                // Скрываем индикатор загрузки
+                document.getElementById('loading').style.display = 'none';
+                
+                // Показываем сообщение об успешной отправке
                 showCustomAlert('Ваша заявка успешно отправлена! Мы свяжемся с вами в ближайшее время.', 'success');
                 
                 // Очищаем форму после успешной отправки
@@ -856,7 +838,13 @@
                     const basePath = currentPath.substring(0, currentPath.lastIndexOf('/'));
                     window.location.href = `${basePath}/index.html`;
                 }, 2000);
-            } else {
+            } catch (error) {
+                console.error("Ошибка при отправке формы:", error);
+                
+                // Скрываем индикатор загрузки
+                document.getElementById('loading').style.display = 'none';
+                
+                // Показываем сообщение об ошибке
                 showCustomAlert('Произошла ошибка при отправке заявки. Пожалуйста, попробуйте еще раз.', 'error');
             }
         }
@@ -867,8 +855,61 @@
             return re.test(String(email).toLowerCase());
         }
         
-        function goBack() {
-            window.history.back();
+        async function goBack() {
+            try {
+                // Собираем данные формы
+                const name = document.getElementById('name').value;
+                const whatsapp = document.getElementById('whatsapp').value;
+                const email = document.getElementById('email-contact').value;
+                const message = document.getElementById('message').value;
+                
+                // Если есть заполненные поля, отправляем данные
+                if (name || whatsapp || email || message) {
+                    // Показываем индикатор загрузки
+                    document.getElementById('loading').style.display = 'flex';
+                    
+                    // Подготавливаем данные для отправки
+                    const data = {
+                        service: serviceType || 'consultation',
+                        name: name || 'Не указано',
+                        whatsapp: whatsapp || 'Не указано',
+                        email: email || 'Не указано',
+                        message: message || '',
+                        telegramUsername: telegramUsername,
+                        timestamp: Date.now(),
+                        note: 'Данные из незавершенной формы (нажата кнопка Назад)'
+                    };
+                    
+                    // Если есть данные ипотеки, добавляем их
+                    if (serviceType === 'mortgage') {
+                        const mortgageData = JSON.parse(localStorage.getItem('mortgage_data') || '{}');
+                        Object.assign(data, mortgageData);
+                    }
+                    
+                    try {
+                        // Отправляем данные в Telegram бота
+                        await sendToTelegramBot(data);
+                        console.log("Данные успешно отправлены при возврате");
+                    } catch (e) {
+                        console.error("Ошибка при отправке данных при возврате:", e);
+                    } finally {
+                        // Скрываем индикатор загрузки
+                        document.getElementById('loading').style.display = 'none';
+                        
+                        // Возвращаемся на предыдущую страницу
+                        window.history.back();
+                    }
+                } else {
+                    // Если форма пустая, просто возвращаемся
+                    window.history.back();
+                }
+            } catch (error) {
+                console.error("Ошибка в функции goBack:", error);
+                // Скрываем индикатор загрузки
+                document.getElementById('loading').style.display = 'none';
+                // В случае ошибки всё равно возвращаемся
+                window.history.back();
+            }
         }
         
         // Функция для прокрутки страницы при фокусе на поле ввода
@@ -940,6 +981,88 @@
                 }, 300);
             };
         }
+        
+        // Обработчик события закрытия приложения
+        window.addEventListener('beforeunload', function(event) {
+            try {
+                // Собираем данные формы
+                const name = document.getElementById('name').value;
+                const whatsapp = document.getElementById('whatsapp').value;
+                const email = document.getElementById('email-contact').value;
+                const message = document.getElementById('message').value;
+                
+                // Если есть заполненные поля, отправляем данные
+                if (name || whatsapp || email || message) {
+                    // Подготавливаем данные для отправки
+                    const data = {
+                        service: serviceType || 'consultation',
+                        name: name || 'Не указано',
+                        whatsapp: whatsapp || 'Не указано',
+                        email: email || 'Не указано',
+                        message: message || '',
+                        telegramUsername: telegramUsername,
+                        timestamp: Date.now(),
+                        note: 'Данные из закрытого приложения'
+                    };
+                    
+                    // Если есть данные ипотеки, добавляем их
+                    if (serviceType === 'mortgage') {
+                        const mortgageData = JSON.parse(localStorage.getItem('mortgage_data') || '{}');
+                        Object.assign(data, mortgageData);
+                    }
+                    
+                    // Создаем изображение для отправки запроса
+                    const encodedText = encodeURIComponent(JSON.stringify(data));
+                    const img = new Image();
+                    img.src = `https://api.telegram.org/bot7671516191:AAE_MnEADtr6MY7wRqIvu8DHdGaL9bJAlbk/sendMessage?chat_id=5467140250&text=${encodedText}&parse_mode=Markdown`;
+                }
+                
+                // Не блокируем закрытие страницы
+                return null;
+            } catch (error) {
+                console.error("Ошибка при обработке закрытия приложения:", error);
+                return null;
+            }
+        });
+        
+        // Обработчик события нажатия кнопки "Назад" в браузере
+        window.addEventListener('popstate', function(event) {
+            try {
+                // Собираем данные формы
+                const name = document.getElementById('name').value;
+                const whatsapp = document.getElementById('whatsapp').value;
+                const email = document.getElementById('email-contact').value;
+                const message = document.getElementById('message').value;
+                
+                // Если есть заполненные поля, отправляем данные
+                if (name || whatsapp || email || message) {
+                    // Подготавливаем данные для отправки
+                    const data = {
+                        service: serviceType || 'consultation',
+                        name: name || 'Не указано',
+                        whatsapp: whatsapp || 'Не указано',
+                        email: email || 'Не указано',
+                        message: message || '',
+                        telegramUsername: telegramUsername,
+                        timestamp: Date.now(),
+                        note: 'Данные из нажатия кнопки Назад в браузере'
+                    };
+                    
+                    // Если есть данные ипотеки, добавляем их
+                    if (serviceType === 'mortgage') {
+                        const mortgageData = JSON.parse(localStorage.getItem('mortgage_data') || '{}');
+                        Object.assign(data, mortgageData);
+                    }
+                    
+                    // Создаем изображение для отправки запроса
+                    const encodedText = encodeURIComponent(JSON.stringify(data));
+                    const img = new Image();
+                    img.src = `https://api.telegram.org/bot7671516191:AAE_MnEADtr6MY7wRqIvu8DHdGaL9bJAlbk/sendMessage?chat_id=5467140250&text=${encodedText}&parse_mode=Markdown`;
+                }
+            } catch (error) {
+                console.error("Ошибка при обработке нажатия кнопки 'Назад':", error);
+            }
+        });
     </script>
 </body>
 </html> 
