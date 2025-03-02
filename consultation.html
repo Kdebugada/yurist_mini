@@ -206,6 +206,32 @@
             font-size: 12px;
             text-align: center;
         }
+        
+        .country-flag {
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 20px;
+            height: 15px;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+        
+        .phone-input-container {
+            position: relative;
+        }
+        
+        .phone-input {
+            padding-left: 35px !important;
+        }
+        
+        .required-field::after {
+            content: '*';
+            color: red;
+            margin-left: 3px;
+        }
     </style>
 </head>
 <body>
@@ -220,27 +246,21 @@
         
         <div class="form-container">
             <div class="form-group">
-                <label class="form-label" for="name">Ваше имя</label>
+                <label class="form-label required-field" for="name">Ваше имя</label>
                 <input type="text" id="name" class="form-input" placeholder="Введите ваше имя">
             </div>
             
             <div class="form-group">
-                <label class="form-label">Выберите способ связи</label>
-                <div class="contact-buttons">
-                    <div class="contact-button" onclick="selectContact('whatsapp')" id="whatsapp-button">
-                        <div class="contact-icon"><img src="logo/whatsap.svg" alt="WhatsApp"></div>
-                        <div class="contact-label">WhatsApp</div>
-                    </div>
-                    <div class="contact-button" onclick="selectContact('telegram')" id="telegram-button">
-                        <div class="contact-icon"><img src="logo/tg.svg" alt="Telegram"></div>
-                        <div class="contact-label">Telegram</div>
-                    </div>
-                    <div class="contact-button" onclick="selectContact('email')" id="email-button">
-                        <div class="contact-icon">✉️</div>
-                        <div class="contact-label">Email</div>
-                    </div>
+                <label class="form-label required-field" for="whatsapp">WhatsApp</label>
+                <div id="whatsapp-container" class="phone-input-container">
+                    <div id="whatsapp-flag" class="country-flag"></div>
+                    <input type="tel" id="whatsapp" class="form-input phone-input" placeholder="Введите номер WhatsApp" oninput="detectCountry('whatsapp')">
                 </div>
-                <input type="text" id="contact" class="form-input" style="margin-top: 10px;" placeholder="Введите контактную информацию">
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label required-field" for="email-contact">Email</label>
+                <input type="email" id="email-contact" class="form-input" placeholder="Введите email для связи">
             </div>
             
             <div class="form-group">
@@ -259,8 +279,195 @@
         let tg = window.Telegram.WebApp;
         tg.expand();
         
-        let selectedContactType = '';
         let serviceType = '';
+        
+        // Коды стран и их флаги
+        const countryCodes = {
+            '1': 'us', // США
+            '7': 'ru', // Россия
+            '33': 'fr', // Франция
+            '34': 'es', // Испания
+            '39': 'it', // Италия
+            '44': 'gb', // Великобритания
+            '49': 'de', // Германия
+            '55': 'br', // Бразилия
+            '61': 'au', // Австралия
+            '81': 'jp', // Япония
+            '86': 'cn', // Китай
+            '91': 'in', // Индия
+            '971': 'ae', // ОАЭ
+            '972': 'il', // Израиль
+            '966': 'sa', // Саудовская Аравия
+            '90': 'tr', // Турция
+            '380': 'ua', // Украина
+            '375': 'by', // Беларусь
+            '998': 'uz', // Узбекистан
+            '996': 'kg', // Киргизия
+            '995': 'ge', // Грузия
+            '994': 'az', // Азербайджан
+            '993': 'tm', // Туркменистан
+            '992': 'tj', // Таджикистан
+            '374': 'am', // Армения
+            '373': 'md', // Молдова
+            '370': 'lt', // Литва
+            '371': 'lv', // Латвия
+            '372': 'ee', // Эстония
+            '48': 'pl', // Польша
+            '420': 'cz', // Чехия
+            '421': 'sk', // Словакия
+            '36': 'hu', // Венгрия
+            '40': 'ro', // Румыния
+            '359': 'bg', // Болгария
+            '30': 'gr', // Греция
+            '46': 'se', // Швеция
+            '47': 'no', // Норвегия
+            '358': 'fi', // Финляндия
+            '45': 'dk', // Дания
+            '31': 'nl', // Нидерланды
+            '32': 'be', // Бельгия
+            '41': 'ch', // Швейцария
+            '43': 'at', // Австрия
+            '351': 'pt', // Португалия
+            '353': 'ie', // Ирландия
+            '352': 'lu', // Люксембург
+            '356': 'mt', // Мальта
+            '357': 'cy', // Кипр
+            '386': 'si', // Словения
+            '385': 'hr', // Хорватия
+            '381': 'rs', // Сербия
+            '355': 'al', // Албания
+            '389': 'mk', // Северная Македония
+            '387': 'ba', // Босния и Герцеговина
+            '382': 'me', // Черногория
+            '377': 'mc', // Монако
+            '376': 'ad', // Андорра
+            '378': 'sm', // Сан-Марино
+            '379': 'va', // Ватикан
+            '350': 'gi', // Гибралтар
+            '354': 'is', // Исландия
+            '298': 'fo', // Фарерские острова
+            '299': 'gl', // Гренландия
+            '213': 'dz', // Алжир
+            '20': 'eg', // Египет
+            '212': 'ma', // Марокко
+            '216': 'tn', // Тунис
+            '218': 'ly', // Ливия
+            '249': 'sd', // Судан
+            '251': 'et', // Эфиопия
+            '254': 'ke', // Кения
+            '255': 'tz', // Танзания
+            '256': 'ug', // Уганда
+            '260': 'zm', // Замбия
+            '263': 'zw', // Зимбабве
+            '27': 'za', // ЮАР
+            '234': 'ng', // Нигерия
+            '233': 'gh', // Гана
+            '225': 'ci', // Кот-д'Ивуар
+            '221': 'sn', // Сенегал
+            '237': 'cm', // Камерун
+            '244': 'ao', // Ангола
+            '250': 'rw', // Руанда
+            '241': 'ga', // Габон
+            '242': 'cg', // Конго
+            '243': 'cd', // ДР Конго
+            '235': 'td', // Чад
+            '236': 'cf', // ЦАР
+            '238': 'cv', // Кабо-Верде
+            '240': 'gq', // Экваториальная Гвинея
+            '245': 'gw', // Гвинея-Бисау
+            '247': 'sh', // Остров Святой Елены
+            '248': 'sc', // Сейшельские острова
+            '252': 'so', // Сомали
+            '253': 'dj', // Джибути
+            '257': 'bi', // Бурунди
+            '258': 'mz', // Мозамбик
+            '261': 'mg', // Мадагаскар
+            '262': 're', // Реюньон
+            '264': 'na', // Намибия
+            '265': 'mw', // Малави
+            '266': 'ls', // Лесото
+            '267': 'bw', // Ботсвана
+            '268': 'sz', // Свазиленд
+            '269': 'km', // Коморские острова
+            '290': 'sh', // Остров Святой Елены
+            '291': 'er', // Эритрея
+            '297': 'aw', // Аруба
+            '501': 'bz', // Белиз
+            '502': 'gt', // Гватемала
+            '503': 'sv', // Сальвадор
+            '504': 'hn', // Гондурас
+            '505': 'ni', // Никарагуа
+            '506': 'cr', // Коста-Рика
+            '507': 'pa', // Панама
+            '509': 'ht', // Гаити
+            '51': 'pe', // Перу
+            '52': 'mx', // Мексика
+            '53': 'cu', // Куба
+            '54': 'ar', // Аргентина
+            '56': 'cl', // Чили
+            '57': 'co', // Колумбия
+            '58': 've', // Венесуэла
+            '591': 'bo', // Боливия
+            '592': 'gy', // Гайана
+            '593': 'ec', // Эквадор
+            '595': 'py', // Парагвай
+            '597': 'sr', // Суринам
+            '598': 'uy', // Уругвай
+            '599': 'an', // Нидерландские Антильские острова
+            '60': 'my', // Малайзия
+            '62': 'id', // Индонезия
+            '63': 'ph', // Филиппины
+            '64': 'nz', // Новая Зеландия
+            '65': 'sg', // Сингапур
+            '66': 'th', // Таиланд
+            '673': 'bn', // Бруней
+            '674': 'nr', // Науру
+            '675': 'pg', // Папуа-Новая Гвинея
+            '676': 'to', // Тонга
+            '677': 'sb', // Соломоновы острова
+            '678': 'vu', // Вануату
+            '679': 'fj', // Фиджи
+            '680': 'pw', // Палау
+            '681': 'wf', // Уоллис и Футуна
+            '682': 'ck', // Острова Кука
+            '683': 'nu', // Ниуэ
+            '684': 'as', // Американское Самоа
+            '685': 'ws', // Самоа
+            '686': 'ki', // Кирибати
+            '687': 'nc', // Новая Каледония
+            '688': 'tv', // Тувалу
+            '689': 'pf', // Французская Полинезия
+            '690': 'tk', // Токелау
+            '691': 'fm', // Микронезия
+            '692': 'mh', // Маршалловы острова
+            '850': 'kp', // Северная Корея
+            '852': 'hk', // Гонконг
+            '853': 'mo', // Макао
+            '855': 'kh', // Камбоджа
+            '856': 'la', // Лаос
+            '880': 'bd', // Бангладеш
+            '886': 'tw', // Тайвань
+            '960': 'mv', // Мальдивы
+            '961': 'lb', // Ливан
+            '962': 'jo', // Иордания
+            '963': 'sy', // Сирия
+            '964': 'iq', // Ирак
+            '965': 'kw', // Кувейт
+            '967': 'ye', // Йемен
+            '968': 'om', // Оман
+            '970': 'ps', // Палестина
+            '973': 'bh', // Бахрейн
+            '974': 'qa', // Катар
+            '975': 'bt', // Бутан
+            '976': 'mn', // Монголия
+            '977': 'np', // Непал
+            '98': 'ir', // Иран
+            '992': 'tj', // Таджикистан
+            '994': 'az', // Азербайджан
+            '995': 'ge', // Грузия
+            '996': 'kg', // Киргизия
+            '998': 'uz'  // Узбекистан
+        };
         
         // Получаем тип услуги из URL параметров
         function getServiceFromUrl() {
@@ -277,27 +484,45 @@
                 const mortgageData = JSON.parse(localStorage.getItem('mortgage_data') || '{}');
                 console.log('Mortgage data:', mortgageData);
             }
+            
+            // Добавляем обработчик ввода для определения страны
+            document.getElementById('whatsapp').addEventListener('input', function() {
+                detectCountry('whatsapp');
+            });
         };
         
-        function selectContact(type) {
-            selectedContactType = type;
+        // Определение страны по коду телефона
+        function detectCountry(inputId) {
+            const phoneInput = document.getElementById(inputId);
+            const countryFlag = document.getElementById(inputId + '-flag');
             
-            // Удаляем активный класс со всех кнопок
-            document.querySelectorAll('.contact-button').forEach(button => {
-                button.classList.remove('active');
-            });
+            let phone = phoneInput.value.replace(/\D/g, '');
             
-            // Добавляем активный класс выбранной кнопке
-            document.getElementById(type + '-button').classList.add('active');
+            if (phone.startsWith('00')) {
+                phone = phone.substring(2);
+            } else if (phone.startsWith('+')) {
+                phone = phone.substring(1);
+            }
             
-            // Меняем плейсхолдер в зависимости от выбранного типа
-            const contactInput = document.getElementById('contact');
-            if (type === 'whatsapp') {
-                contactInput.placeholder = 'Введите номер WhatsApp';
-            } else if (type === 'telegram') {
-                contactInput.placeholder = 'Введите имя пользователя Telegram';
-            } else if (type === 'email') {
-                contactInput.placeholder = 'Введите email';
+            // Проверяем все возможные коды стран от самых длинных до коротких
+            let countryCode = '';
+            let countryISO = '';
+            
+            // Сортируем коды по длине (от длинных к коротким)
+            const sortedCodes = Object.keys(countryCodes).sort((a, b) => b.length - a.length);
+            
+            for (const code of sortedCodes) {
+                if (phone.startsWith(code)) {
+                    countryCode = code;
+                    countryISO = countryCodes[code];
+                    break;
+                }
+            }
+            
+            if (countryISO) {
+                countryFlag.style.backgroundImage = `url(https://flagcdn.com/w20/${countryISO}.png)`;
+            } else {
+                countryFlag.style.backgroundImage = '';
             }
         }
         
@@ -310,8 +535,8 @@
             let messageText = `🔔 *Новая заявка*\n\n`;
             messageText += `*Услуга:* ${getServiceName(data.service)}\n`;
             messageText += `*Имя:* ${data.name}\n`;
-            messageText += `*Способ связи:* ${getContactTypeName(data.contactType)}\n`;
-            messageText += `*Контакт:* ${data.contact}\n`;
+            messageText += `*WhatsApp:* ${data.whatsapp}\n`;
+            messageText += `*Email:* ${data.email}\n`;
             
             if (data.message) {
                 messageText += `*Сообщение:* ${data.message}\n`;
@@ -363,28 +588,30 @@
             return services[serviceCode] || 'Неизвестная услуга';
         }
         
-        // Получение названия типа контакта для сообщения
-        function getContactTypeName(contactType) {
-            const types = {
-                'whatsapp': 'WhatsApp',
-                'telegram': 'Telegram',
-                'email': 'Email'
-            };
-            return types[contactType] || 'Неизвестный тип';
-        }
-        
         async function submitForm() {
             const name = document.getElementById('name').value;
-            const contact = document.getElementById('contact').value;
+            const whatsapp = document.getElementById('whatsapp').value;
+            const email = document.getElementById('email-contact').value;
             const message = document.getElementById('message').value;
             
-            if (!name || !contact) {
-                alert('Пожалуйста, заполните имя и контактную информацию');
+            if (!name) {
+                alert('Пожалуйста, введите ваше имя');
                 return;
             }
             
-            if (!selectedContactType) {
-                alert('Пожалуйста, выберите способ связи');
+            if (!whatsapp) {
+                alert('Пожалуйста, введите номер WhatsApp');
+                return;
+            }
+            
+            if (!email) {
+                alert('Пожалуйста, введите email для связи');
+                return;
+            }
+            
+            // Проверка формата email
+            if (email && !isValidEmail(email)) {
+                alert('Пожалуйста, введите корректный email');
                 return;
             }
             
@@ -392,8 +619,8 @@
             const data = {
                 service: serviceType || 'consultation',
                 name: name,
-                contactType: selectedContactType,
-                contact: contact,
+                whatsapp: whatsapp,
+                email: email,
                 message: message,
                 timestamp: Date.now()
             };
@@ -419,6 +646,12 @@
             }
             
             tg.close();
+        }
+        
+        // Проверка валидности email
+        function isValidEmail(email) {
+            const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+            return re.test(String(email).toLowerCase());
         }
         
         function goBack() {
