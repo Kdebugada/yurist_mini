@@ -520,9 +520,16 @@
             }
             
             if (countryISO) {
+                // Используем прямую ссылку на изображение флага
                 countryFlag.style.backgroundImage = `url(https://flagcdn.com/w20/${countryISO}.png)`;
+                // Делаем флаг видимым
+                countryFlag.style.display = 'block';
+                console.log(`Установлен флаг для страны: ${countryISO}`);
             } else {
                 countryFlag.style.backgroundImage = '';
+                // Если страна не определена, скрываем флаг
+                countryFlag.style.display = 'none';
+                console.log('Страна не определена');
             }
         }
         
