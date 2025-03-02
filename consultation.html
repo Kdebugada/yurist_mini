@@ -228,6 +228,53 @@
             color: red;
             margin-left: 3px;
         }
+        .success-message {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(var(--tg-theme-button-color-rgb, 51, 144, 236), 0.9);
+            color: var(--tg-theme-button-text-color, #ffffff);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            z-index: 1000;
+            max-width: 80%;
+            animation: fadeIn 0.3s ease-out;
+            display: none;
+        }
+        
+        .success-message-icon {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+        
+        .success-message-text {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+        
+        .success-message-button {
+            background-color: var(--tg-theme-button-text-color, #ffffff);
+            color: var(--tg-theme-button-color, #3390ec);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .success-message-button:hover {
+            transform: scale(1.05);
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translate(-50%, -60%); }
+            to { opacity: 1; transform: translate(-50%, -50%); }
+        }
     </style>
 </head>
 <body>
@@ -269,6 +316,13 @@
             <button class="button" onclick="submitForm()">Отправить</button>
             <button class="button back-button" onclick="goBack()">Назад</button>
         </div>
+    </div>
+
+    <div id="success-message" class="success-message">
+        <div class="success-message-icon">✅</div>
+        <div class="success-message-text">Ваша заявка успешно отправлена!</div>
+        <div>Мы свяжемся с вами в ближайшее время</div>
+        <button class="success-message-button" onclick="closeSuccessMessage()">Готово</button>
     </div>
 
     <script>
@@ -611,6 +665,26 @@
             return services[serviceCode] || 'Неизвестная услуга';
         }
         
+        // Функция для показа красивого уведомления
+        function showSuccessMessage() {
+            const successMessage = document.getElementById('success-message');
+            successMessage.style.display = 'block';
+            
+            // Добавляем обработчик клика вне сообщения для его закрытия
+            document.addEventListener('click', function closeOnClickOutside(event) {
+                if (!successMessage.contains(event.target)) {
+                    closeSuccessMessage();
+                    document.removeEventListener('click', closeOnClickOutside);
+                }
+            });
+        }
+        
+        // Функция для закрытия уведомления
+        function closeSuccessMessage() {
+            const successMessage = document.getElementById('success-message');
+            successMessage.style.display = 'none';
+        }
+        
         async function submitForm() {
             const name = document.getElementById('name').value;
             const whatsapp = document.getElementById('whatsapp').value;
@@ -658,18 +732,27 @@
                 localStorage.removeItem('mortgage_data');
             }
             
-            // Отправляем данные в Telegram бота
-            const sentToBot = await sendToTelegramBot(data);
-            
-            // Отправляем данные в Telegram WebApp
-            tg.sendData(JSON.stringify(data));
-            
-            // Показываем сообщение об успешной отправке
-            if (sentToBot) {
-                alert('Ваша заявка успешно отправлена! Мы свяжемся с вами в ближайшее время.');
+            try {
+                // Отправляем данные в Telegram бота
+                const sentToBot = await sendToTelegramBot(data);
+                
+                // Отправляем данные в Telegram WebApp без закрытия приложения
+                tg.sendData(JSON.stringify(data));
+                
+                // Показываем красивое уведомление об успешной отправке
+                if (sentToBot) {
+                    showSuccessMessage();
+                    
+                    // Очищаем форму
+                    document.getElementById('name').value = '';
+                    document.getElementById('whatsapp').value = '';
+                    document.getElementById('email-contact').value = '';
+                    document.getElementById('message').value = '';
+                }
+            } catch (error) {
+                console.error('Error submitting form:', error);
+                alert('Произошла ошибка при отправке формы. Пожалуйста, попробуйте еще раз.');
             }
-            
-            tg.close();
         }
         
         // Проверка валидности email
