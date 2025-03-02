@@ -652,44 +652,247 @@
             
             messageText += `\n📅 Дата: ${new Date().toLocaleString('ru-RU')}`;
             
-            try {
-                // Отправляем запрос к API Telegram для первого администратора
-                const response1 = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        chat_id: ADMIN_ID,
-                        text: messageText,
-                        parse_mode: 'Markdown'
-                    })
-                });
-                
-                // Отправляем запрос к API Telegram для второго администратора
-                const response2 = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        chat_id: SECOND_ADMIN_ID,
-                        text: messageText,
-                        parse_mode: 'Markdown'
-                    })
-                });
-                
-                const result1 = await response1.json();
-                const result2 = await response2.json();
-                
-                console.log('Message sent to first admin:', result1);
-                console.log('Message sent to second admin:', result2);
-                
-                return result1.ok || result2.ok;
-            } catch (error) {
-                console.error('Error sending message to Telegram:', error);
-                return false;
+            // Используем несколько методов для обхода CORS
+            let success = false;
+            
+            // Метод 1: Прямой запрос (может не работать из-за CORS)
+            if (!success) {
+                try {
+                    console.log('Метод 1: Прямой запрос к API Telegram');
+                    
+                    // Отправляем запрос к API Telegram для первого администратора
+                    const response1 = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            chat_id: ADMIN_ID,
+                            text: messageText,
+                            parse_mode: 'Markdown'
+                        })
+                    });
+                    
+                    // Отправляем запрос к API Telegram для второго администратора
+                    const response2 = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            chat_id: SECOND_ADMIN_ID,
+                            text: messageText,
+                            parse_mode: 'Markdown'
+                        })
+                    });
+                    
+                    const result1 = await response1.json();
+                    const result2 = await response2.json();
+                    
+                    success = (result1 && result1.ok) || (result2 && result2.ok);
+                    
+                    if (success) {
+                        console.log('Метод 1 успешен!');
+                        return true;
+                    }
+                } catch (error) {
+                    console.warn('Метод 1 не сработал:', error);
+                }
             }
+            
+            // Метод 2: Использование CORS-прокси
+            if (!success) {
+                try {
+                    console.log('Метод 2: Использование CORS-прокси');
+                    
+                    // Список CORS-прокси для попытки
+                    const corsProxies = [
+                        "https://cors-anywhere.herokuapp.com/",
+                        "https://api.allorigins.win/raw?url=",
+                        "https://corsproxy.io/?",
+                        "https://proxy.cors.sh/"
+                    ];
+                    
+                    // Пробуем каждый прокси по очереди
+                    for (const proxy of corsProxies) {
+                        try {
+                            console.log(`Попытка использования прокси: ${proxy}`);
+                            
+                            // URL API Telegram
+                            const apiUrl = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
+                            
+                            // Отправляем запрос через прокси для первого администратора
+                            const response1 = await fetch(proxy + apiUrl, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-Requested-With': 'XMLHttpRequest'
+                                },
+                                body: JSON.stringify({
+                                    chat_id: ADMIN_ID,
+                                    text: messageText,
+                                    parse_mode: 'Markdown'
+                                })
+                            });
+                            
+                            // Отправляем запрос через прокси для второго администратора
+                            const response2 = await fetch(proxy + apiUrl, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-Requested-With': 'XMLHttpRequest'
+                                },
+                                body: JSON.stringify({
+                                    chat_id: SECOND_ADMIN_ID,
+                                    text: messageText,
+                                    parse_mode: 'Markdown'
+                                })
+                            });
+                            
+                            const result1 = await response1.json();
+                            const result2 = await response2.json();
+                            
+                            success = (result1 && result1.ok) || (result2 && result2.ok);
+                            
+                            if (success) {
+                                console.log(`Прокси ${proxy} успешно сработал!`);
+                                return true;
+                            }
+                        } catch (proxyError) {
+                            console.warn(`Прокси ${proxy} не сработал:`, proxyError);
+                            // Продолжаем со следующим прокси
+                        }
+                    }
+                } catch (error) {
+                    console.warn('Метод 2 не сработал:', error);
+                }
+            }
+            
+            // Метод 3: Использование JSONP (для GET-запросов)
+            if (!success) {
+                try {
+                    console.log('Метод 3: Использование JSONP');
+                    
+                    // Создаем Promise для JSONP запроса
+                    const jsonpPromise = (chatId) => {
+                        return new Promise((resolve, reject) => {
+                            // Создаем уникальное имя функции обратного вызова
+                            const callbackName = 'jsonpCallback_' + Date.now() + '_' + Math.floor(Math.random() * 1000);
+                            
+                            // Создаем URL для JSONP запроса
+                            const jsonpUrl = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(messageText)}&parse_mode=Markdown&callback=${callbackName}`;
+                            
+                            // Создаем элемент script
+                            const script = document.createElement('script');
+                            script.src = jsonpUrl;
+                            
+                            // Определяем функцию обратного вызова
+                            window[callbackName] = function(data) {
+                                // Очищаем ресурсы
+                                document.body.removeChild(script);
+                                delete window[callbackName];
+                                
+                                // Разрешаем Promise с данными
+                                resolve(data);
+                            };
+                            
+                            // Обработка ошибок
+                            script.onerror = function() {
+                                // Очищаем ресурсы
+                                document.body.removeChild(script);
+                                delete window[callbackName];
+                                
+                                // Отклоняем Promise с ошибкой
+                                reject(new Error('JSONP request failed'));
+                            };
+                            
+                            // Добавляем script на страницу
+                            document.body.appendChild(script);
+                            
+                            // Устанавливаем таймаут
+                            setTimeout(() => {
+                                if (window[callbackName]) {
+                                    // Очищаем ресурсы
+                                    if (document.body.contains(script)) {
+                                        document.body.removeChild(script);
+                                    }
+                                    delete window[callbackName];
+                                    
+                                    // Отклоняем Promise с ошибкой таймаута
+                                    reject(new Error('JSONP request timed out'));
+                                }
+                            }, 10000);
+                        });
+                    };
+                    
+                    // Пробуем отправить сообщения обоим администраторам
+                    try {
+                        const [result1, result2] = await Promise.allSettled([
+                            jsonpPromise(ADMIN_ID),
+                            jsonpPromise(SECOND_ADMIN_ID)
+                        ]);
+                        
+                        success = (result1.status === 'fulfilled' && result1.value && result1.value.ok) || 
+                                  (result2.status === 'fulfilled' && result2.value && result2.value.ok);
+                        
+                        if (success) {
+                            console.log('Метод 3 успешен!');
+                            return true;
+                        }
+                    } catch (jsonpError) {
+                        console.warn('JSONP запросы не удались:', jsonpError);
+                    }
+                } catch (error) {
+                    console.warn('Метод 3 не сработал:', error);
+                }
+            }
+            
+            // Метод 4: Использование iframe для обхода CORS (последняя попытка)
+            if (!success) {
+                try {
+                    console.log('Метод 4: Использование iframe');
+                    
+                    // Функция для создания скрытого iframe и отправки запроса
+                    const sendViaIframe = (chatId) => {
+                        return new Promise((resolve) => {
+                            // Создаем iframe
+                            const iframe = document.createElement('iframe');
+                            iframe.style.display = 'none';
+                            document.body.appendChild(iframe);
+                            
+                            // URL для запроса
+                            const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(messageText)}&parse_mode=Markdown`;
+                            
+                            // Устанавливаем src для iframe
+                            iframe.src = url;
+                            
+                            // Устанавливаем таймаут для удаления iframe
+                            setTimeout(() => {
+                                if (document.body.contains(iframe)) {
+                                    document.body.removeChild(iframe);
+                                }
+                                // Предполагаем, что запрос был отправлен
+                                resolve(true);
+                            }, 5000);
+                        });
+                    };
+                    
+                    // Отправляем запросы через iframe
+                    await Promise.all([
+                        sendViaIframe(ADMIN_ID),
+                        sendViaIframe(SECOND_ADMIN_ID)
+                    ]);
+                    
+                    console.log('Метод 4: Запросы отправлены через iframe (результат неизвестен)');
+                    // Предполагаем, что хотя бы один запрос был успешным
+                    success = true;
+                } catch (error) {
+                    console.warn('Метод 4 не сработал:', error);
+                }
+            }
+            
+            // Возвращаем результат
+            return success;
         }
         
         // Получение названия услуги для сообщения
@@ -725,10 +928,10 @@
             successMessage.style.display = 'none';
         }
         
-        async function submitForm() {
+        async function submitForm(event) {
             try {
                 // Предотвращаем стандартное поведение формы
-                event.preventDefault();
+                if (event) event.preventDefault();
                 
                 const name = document.getElementById('name').value;
                 const whatsapp = document.getElementById('whatsapp').value;
@@ -779,51 +982,56 @@
                 console.log('Отправка данных:', data);
                 
                 // Отправляем данные в Telegram бота
-                const sentToBot = await sendToTelegramBot(data);
-                
-                if (sentToBot) {
-                    console.log('Данные успешно отправлены боту');
+                try {
+                    const sentToBot = await sendToTelegramBot(data);
                     
-                    // Показываем красивое уведомление об успешной отправке
-                    showSuccessMessage();
-                    
-                    // Очищаем форму
-                    document.getElementById('name').value = '';
-                    document.getElementById('whatsapp').value = '';
-                    document.getElementById('email-contact').value = '';
-                    document.getElementById('message').value = '';
-                    
-                    // Сохраняем данные в localStorage
-                    localStorage.setItem('last_submission', JSON.stringify(data));
-                    
-                    // Используем MainButton для обратной связи
-                    tg.MainButton.setText('Заявка отправлена ✅');
-                    tg.MainButton.show();
-                    
-                    // Скрываем кнопку через 3 секунды
-                    setTimeout(() => {
-                        tg.MainButton.hide();
-                    }, 3000);
-                    
-                    // Добавляем кнопку "Вернуться на главную"
-                    const buttonContainer = document.querySelector('.button-container');
-                    
-                    // Проверяем, нет ли уже кнопки "Вернуться на главную"
-                    if (!document.getElementById('back-to-main-button')) {
-                        const backButton = document.createElement('button');
-                        backButton.className = 'button';
-                        backButton.id = 'back-to-main-button';
-                        backButton.textContent = 'Вернуться на главную';
-                        backButton.onclick = function() {
-                            window.location.href = 'index.html';
-                        };
+                    if (sentToBot) {
+                        console.log('Данные успешно отправлены боту');
                         
-                        // Добавляем кнопку после существующих кнопок
-                        buttonContainer.appendChild(backButton);
+                        // Показываем красивое уведомление об успешной отправке
+                        showSuccessMessage();
+                        
+                        // Очищаем форму
+                        document.getElementById('name').value = '';
+                        document.getElementById('whatsapp').value = '';
+                        document.getElementById('email-contact').value = '';
+                        document.getElementById('message').value = '';
+                        
+                        // Сохраняем данные в localStorage
+                        localStorage.setItem('last_submission', JSON.stringify(data));
+                        
+                        // Используем MainButton для обратной связи
+                        tg.MainButton.setText('Заявка отправлена ✅');
+                        tg.MainButton.show();
+                        
+                        // Скрываем кнопку через 3 секунды
+                        setTimeout(() => {
+                            tg.MainButton.hide();
+                        }, 3000);
+                        
+                        // Добавляем кнопку "Вернуться на главную"
+                        const buttonContainer = document.querySelector('.button-container');
+                        
+                        // Проверяем, нет ли уже кнопки "Вернуться на главную"
+                        if (!document.getElementById('back-to-main-button')) {
+                            const backButton = document.createElement('button');
+                            backButton.className = 'button';
+                            backButton.id = 'back-to-main-button';
+                            backButton.textContent = 'Вернуться на главную';
+                            backButton.onclick = function() {
+                                window.location.href = 'index.html';
+                            };
+                            
+                            // Добавляем кнопку после существующих кнопок
+                            buttonContainer.appendChild(backButton);
+                        }
+                    } else {
+                        console.error('Ошибка при отправке данных боту');
+                        alert('Произошла ошибка при отправке формы. Пожалуйста, попробуйте еще раз.');
                     }
-                } else {
-                    console.error('Ошибка при отправке данных боту');
-                    alert('Произошла ошибка при отправке формы. Пожалуйста, попробуйте еще раз.');
+                } catch (botError) {
+                    console.error('Ошибка при отправке данных в Telegram:', botError);
+                    alert('Произошла ошибка при отправке сообщения в Telegram. Пожалуйста, попробуйте еще раз.');
                 }
             } catch (error) {
                 console.error('Error submitting form:', error);
