@@ -146,6 +146,10 @@
             from { transform: translateX(50px); opacity: 0; }
             to { transform: translateX(0); opacity: 1; }
         }
+        .full-width-button {
+            width: 100%; /* Полная ширина */
+            margin-top: 8px;
+        }
     </style>
 </head>
 <body>
@@ -161,8 +165,7 @@
         <button class="button" style="--i:2" onclick="handleClick('visa')">ВИЗА</button>
         <button class="button" style="--i:3" onclick="handleClick('bank')">СЧЕТ В БАНКЕ</button>
         <button class="button" style="--i:4" onclick="handleClick('lawyer')">ВАШ ЮРИСТ</button>
-        <button class="button" style="--i:5" onclick="handleClick('company')">ОТКРЫТЬ КОМПАНИЮ</button>
-        <button class="button" style="--i:6" onclick="handleClick('consultation')">КОНСУЛЬТАЦИЯ</button>
+        <button class="button full-width-button" style="--i:5" onclick="handleClick('company')">ОТКРЫТЬ КОМПАНИЮ</button>
     </div>
 
     <script>
@@ -195,6 +198,11 @@
                 const currentPath = window.location.pathname;
                 const basePath = currentPath.substring(0, currentPath.lastIndexOf('/'));
                 window.location.href = `${basePath}/bank.html`;
+            } else if (service === 'company') {
+                // Открываем страницу открытия компании
+                const currentPath = window.location.pathname;
+                const basePath = currentPath.substring(0, currentPath.lastIndexOf('/'));
+                window.location.href = `${basePath}/company.html`;
             } else {
                 tg.sendData(JSON.stringify({
                     service: service,
