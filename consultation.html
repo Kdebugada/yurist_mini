@@ -14,10 +14,8 @@
             min-height: 100vh;
             margin: 0;
             overflow-x: hidden;
-            overflow-y: hidden; /* Предотвращаем вертикальную прокрутку */
-            position: fixed;
+            position: relative;
             width: 100%;
-            height: 100%;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -143,6 +141,9 @@
         .button-container {
             margin-top: 0px;
             flex: 0 0 auto;
+            padding-bottom: 20px;
+            position: relative;
+            z-index: 10;
         }
         .button {
             display: block;
@@ -369,6 +370,24 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+        
+        /* Добавляем стили для фиксированного положения кнопок при открытой клавиатуре */
+        .keyboard-open .button-container {
+            position: fixed;
+            bottom: 10px;
+            left: 0;
+            right: 0;
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 10px;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+            z-index: 100;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        
+        .keyboard-open .container {
+            padding-bottom: 70px;
+        }
     </style>
 </head>
 <body>
@@ -434,6 +453,7 @@
         
         let serviceType = '';
         let telegramUsername = '';
+        let isKeyboardOpen = false;
         
         // Коды стран и их флаги
         const countryCodes = {
@@ -971,19 +991,42 @@
                 const offsetTop = rect.top + scrollTop;
                 
                 // Прокручиваем страницу так, чтобы поле ввода было в верхней части экрана
-                // Это поможет избежать перекрытия клавиатурой
                 window.scrollTo({
                     top: offsetTop - 100, // Отступ сверху для удобства
                     behavior: 'smooth'
                 });
+                
+                // Добавляем класс для фиксации кнопок
+                document.body.classList.add('keyboard-open');
+                isKeyboardOpen = true;
             }, 300);
         }
+        
+        // Добавляем обработчики событий для скрытия клавиатуры и возврата кнопок в нормальное положение
+        document.querySelectorAll('.form-input, .form-textarea').forEach(input => {
+            input.addEventListener('blur', function() {
+                // Задержка для корректной работы на мобильных устройствах
+                setTimeout(() => {
+                    // Проверяем, что ни одно поле не в фокусе
+                    if (!document.querySelector('.form-input:focus, .form-textarea:focus')) {
+                        document.body.classList.remove('keyboard-open');
+                        isKeyboardOpen = false;
+                    }
+                }, 300);
+            });
+        });
         
         // Добавляем обработчики событий для скрытия клавиатуры при нажатии на кнопки
         document.querySelectorAll('.button').forEach(button => {
             button.addEventListener('touchstart', function() {
                 // Снимаем фокус с активного элемента для скрытия клавиатуры
                 document.activeElement.blur();
+                
+                // Убираем класс keyboard-open
+                setTimeout(() => {
+                    document.body.classList.remove('keyboard-open');
+                    isKeyboardOpen = false;
+                }, 300);
             });
         });
         
@@ -1030,6 +1073,29 @@
                 }, 300);
             };
         }
+        
+        // Функция для определения открытия клавиатуры
+        function detectKeyboard() {
+            const originalHeight = window.innerHeight;
+            
+            window.addEventListener('resize', function() {
+                // Если высота окна уменьшилась более чем на 30%, считаем что открылась клавиатура
+                if (window.innerHeight < originalHeight * 0.7) {
+                    if (!isKeyboardOpen) {
+                        isKeyboardOpen = true;
+                        document.body.classList.add('keyboard-open');
+                    }
+                } else {
+                    if (isKeyboardOpen) {
+                        isKeyboardOpen = false;
+                        document.body.classList.remove('keyboard-open');
+                    }
+                }
+            });
+        }
+        
+        // Вызываем функцию при загрузке страницы
+        window.addEventListener('DOMContentLoaded', detectKeyboard);
         
         // Обработчик события закрытия приложения
         window.addEventListener('beforeunload', function(event) {
@@ -1221,14 +1287,8 @@
             }
         });
         
-        // Запрет скроллинга страницы
-        document.addEventListener('touchmove', function(e) {
-            e.preventDefault();
-        }, { passive: false });
-        
-        document.addEventListener('wheel', function(e) {
-            e.preventDefault();
-        }, { passive: false });
+        // Разрешаем скроллинг страницы для мобильных устройств
+        // Это необходимо для корректной работы с клавиатурой
     </script>
 </body>
 </html> 
