@@ -134,6 +134,15 @@
             min-height: 60px;
             resize: vertical;
         }
+        
+        /* Дополнительный отступ для текстового поля на iOS устройствах */
+        @supports (-webkit-touch-callout: none) {
+            .form-textarea {
+                padding-bottom: 40px; /* Увеличенный нижний отступ */
+                min-height: 100px; /* Увеличенная минимальная высота */
+            }
+        }
+        
         .form-textarea::placeholder {
             color: #666666;
         }
@@ -408,6 +417,11 @@
                 .keyboard-open .button-container {
                     bottom: 50px;
                 }
+            }
+            
+            /* Дополнительный отступ для контейнера формы при открытой клавиатуре */
+            .keyboard-open .form-container {
+                padding-bottom: 80px;
             }
         }
     </style>
@@ -1035,14 +1049,24 @@
                     buttonContainer.style.boxShadow = '0 -2px 10px rgba(0, 0, 0, 0.1)';
                 }
                 
-                // Для iOS устройств добавляем дополнительную прокрутку
+                // Для iOS устройств добавляем дополнительную прокрутку и отступ для текстового поля
                 if (isIOS()) {
-                    setTimeout(() => {
-                        window.scrollTo({
-                            top: offsetTop - 150,
-                            behavior: 'smooth'
-                        });
-                    }, 500);
+                    // Если это текстовое поле, добавляем больший отступ
+                    if (element.id === 'message') {
+                        setTimeout(() => {
+                            window.scrollTo({
+                                top: offsetTop - 200, // Больший отступ для текстового поля
+                                behavior: 'smooth'
+                            });
+                        }, 500);
+                    } else {
+                        setTimeout(() => {
+                            window.scrollTo({
+                                top: offsetTop - 150,
+                                behavior: 'smooth'
+                            });
+                        }, 500);
+                    }
                 }
             }, 300);
         }
@@ -1211,10 +1235,18 @@
                             const offsetTop = rect.top + scrollTop;
                             
                             // Прокручиваем с большим отступом для iOS
-                            window.scrollTo({
-                                top: offsetTop - 150,
-                                behavior: 'smooth'
-                            });
+                            // Для текстового поля делаем еще больший отступ
+                            if (this.id === 'message') {
+                                window.scrollTo({
+                                    top: offsetTop - 200, // Больший отступ для текстового поля
+                                    behavior: 'smooth'
+                                });
+                            } else {
+                                window.scrollTo({
+                                    top: offsetTop - 150,
+                                    behavior: 'smooth'
+                                });
+                            }
                             
                             // Фиксируем кнопки с большим отступом снизу
                             const buttonContainer = document.querySelector('.button-container');
