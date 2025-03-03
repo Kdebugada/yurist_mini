@@ -392,6 +392,24 @@
         .keyboard-open .container {
             padding-bottom: 70px;
         }
+        
+        /* Специальные стили для iOS устройств */
+        @supports (-webkit-touch-callout: none) {
+            .button-container {
+                padding-bottom: 30px;
+            }
+            
+            .keyboard-open .button-container {
+                bottom: 30px; /* Увеличенный отступ для iOS */
+            }
+            
+            /* Дополнительный отступ для iPhone X и новее */
+            @media screen and (min-height: 800px) {
+                .keyboard-open .button-container {
+                    bottom: 50px;
+                }
+            }
+        }
     </style>
 </head>
 <body>
@@ -1008,7 +1026,7 @@
                 const buttonContainer = document.querySelector('.button-container');
                 if (buttonContainer) {
                     buttonContainer.style.position = 'fixed';
-                    buttonContainer.style.bottom = '10px';
+                    buttonContainer.style.bottom = isIOS() ? '50px' : '10px'; // Больший отступ для iOS
                     buttonContainer.style.left = '0';
                     buttonContainer.style.right = '0';
                     buttonContainer.style.zIndex = '100';
@@ -1016,7 +1034,23 @@
                     buttonContainer.style.backgroundColor = 'rgba(255, 255, 255, 0.9)';
                     buttonContainer.style.boxShadow = '0 -2px 10px rgba(0, 0, 0, 0.1)';
                 }
+                
+                // Для iOS устройств добавляем дополнительную прокрутку
+                if (isIOS()) {
+                    setTimeout(() => {
+                        window.scrollTo({
+                            top: offsetTop - 150,
+                            behavior: 'smooth'
+                        });
+                    }, 500);
+                }
             }, 300);
+        }
+        
+        // Функция для определения iOS устройства
+        function isIOS() {
+            return /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+                   (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
         }
         
         // Добавляем обработчики событий для скрытия клавиатуры и возврата кнопок в нормальное положение
@@ -1124,7 +1158,7 @@
                         const buttonContainer = document.querySelector('.button-container');
                         if (buttonContainer) {
                             buttonContainer.style.position = 'fixed';
-                            buttonContainer.style.bottom = '10px';
+                            buttonContainer.style.bottom = isIOS() ? '50px' : '10px'; // Больший отступ для iOS
                             buttonContainer.style.left = '0';
                             buttonContainer.style.right = '0';
                             buttonContainer.style.zIndex = '100';
@@ -1164,6 +1198,73 @@
                     }
                 }
             });
+            
+            // Специальная обработка для iOS устройств
+            if (isIOS()) {
+                // Добавляем обработчики для всех полей ввода
+                document.querySelectorAll('.form-input, .form-textarea').forEach(input => {
+                    input.addEventListener('focus', function() {
+                        // Дополнительная задержка для iOS
+                        setTimeout(() => {
+                            const rect = this.getBoundingClientRect();
+                            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+                            const offsetTop = rect.top + scrollTop;
+                            
+                            // Прокручиваем с большим отступом для iOS
+                            window.scrollTo({
+                                top: offsetTop - 150,
+                                behavior: 'smooth'
+                            });
+                            
+                            // Фиксируем кнопки с большим отступом снизу
+                            const buttonContainer = document.querySelector('.button-container');
+                            if (buttonContainer) {
+                                buttonContainer.style.position = 'fixed';
+                                buttonContainer.style.bottom = '50px';
+                                buttonContainer.style.left = '0';
+                                buttonContainer.style.right = '0';
+                                buttonContainer.style.zIndex = '100';
+                                buttonContainer.style.padding = '10px';
+                                buttonContainer.style.backgroundColor = 'rgba(255, 255, 255, 0.9)';
+                                buttonContainer.style.boxShadow = '0 -2px 10px rgba(0, 0, 0, 0.1)';
+                            }
+                        }, 600);
+                    });
+                });
+                
+                // Добавляем дополнительный обработчик для iOS
+                document.addEventListener('focusin', function(e) {
+                    if (e.target.classList.contains('form-input') || e.target.classList.contains('form-textarea')) {
+                        document.body.classList.add('keyboard-open');
+                        isKeyboardOpen = true;
+                    }
+                });
+                
+                document.addEventListener('focusout', function(e) {
+                    if (e.target.classList.contains('form-input') || e.target.classList.contains('form-textarea')) {
+                        // Проверяем, что ни одно поле не в фокусе
+                        setTimeout(() => {
+                            if (!document.querySelector('.form-input:focus, .form-textarea:focus')) {
+                                document.body.classList.remove('keyboard-open');
+                                isKeyboardOpen = false;
+                                
+                                // Возвращаем кнопки в нормальное положение
+                                const buttonContainer = document.querySelector('.button-container');
+                                if (buttonContainer) {
+                                    buttonContainer.style.position = '';
+                                    buttonContainer.style.bottom = '';
+                                    buttonContainer.style.left = '';
+                                    buttonContainer.style.right = '';
+                                    buttonContainer.style.zIndex = '';
+                                    buttonContainer.style.padding = '';
+                                    buttonContainer.style.backgroundColor = '';
+                                    buttonContainer.style.boxShadow = '';
+                                }
+                            }
+                        }, 300);
+                    }
+                });
+            }
         }
         
         // Вызываем функцию при загрузке страницы
