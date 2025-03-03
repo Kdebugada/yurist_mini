@@ -166,8 +166,14 @@
         tg.expand();
         
         function submitForm() {
-            // Перенаправляем на WhatsApp используя tg.openLink()
-            tg.openLink('https://wa.me/79272329533');
+            // Открываем WhatsApp во внешнем браузере
+            const link = document.createElement('a');
+            link.href = 'https://wa.me/79272329533';
+            link.target = '_blank';
+            link.rel = 'noopener noreferrer';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
         }
         
         function goBack() {
