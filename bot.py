@@ -36,7 +36,7 @@ def get_webapp_keyboard():
 async def send_welcome(message: types.Message):
     # Отправляем только инлайн-кнопку для запуска приложения
     await message.answer(
-        "",
+        "Добро пожаловать! Нажмите на кнопку ниже, чтобы открыть мини-приложение.",
         reply_markup=get_webapp_keyboard()
     )
 
@@ -45,7 +45,7 @@ async def send_welcome(message: types.Message):
 async def handle_text(message: types.Message):
     # Отправляем только кнопку для входа в мини-приложение
     await message.answer(
-        "",
+        "Используйте кнопку ниже для доступа к мини-приложению.",
         reply_markup=get_webapp_keyboard()
     )
 

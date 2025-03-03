@@ -14,6 +14,10 @@
             min-height: 100vh;
             margin: 0;
             overflow-x: hidden; /* Предотвращаем горизонтальную прокрутку */
+            overflow-y: hidden; /* Предотвращаем вертикальную прокрутку */
+            position: fixed;
+            width: 100%;
+            height: 100%;
         }
         .container {
             max-width: 450px;
@@ -421,6 +425,15 @@
     <script>
         let tg = window.Telegram.WebApp;
         tg.expand();
+        
+        // Запрет скроллинга страницы
+        document.addEventListener('touchmove', function(e) {
+            e.preventDefault();
+        }, { passive: false });
+        
+        document.addEventListener('wheel', function(e) {
+            e.preventDefault();
+        }, { passive: false });
         
         // Массивы значений для шкал
         const budgetValues = [200000, 250000, 300000, 350000, 400000, 500000, 700000, 1000000];
