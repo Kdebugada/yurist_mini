@@ -166,10 +166,8 @@
         tg.expand();
         
         function submitForm() {
-            // Переходим на страницу обратной связи
-            const currentPath = window.location.pathname;
-            const basePath = currentPath.substring(0, currentPath.lastIndexOf('/'));
-            window.location.href = `${basePath}/consultation.html?service=bank`;
+            // Перенаправляем на WhatsApp вместо страницы обратной связи
+            window.location.href = 'https://wa.me/79272329533';
         }
         
         function goBack() {

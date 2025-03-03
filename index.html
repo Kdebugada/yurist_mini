@@ -182,8 +182,121 @@
             document.getElementById('username').textContent = tg.initDataUnsafe.user.first_name;
         }
 
+        // Функция для отправки сообщения в Telegram бота
+        async function sendToTelegramBot(data) {
+            try {
+                const BOT_TOKEN = '7920170923:AAE_Ch2acQ9AZ0SkOYslSB-Ce5Tot8bxcBM';
+                // Массив ID администраторов
+                const ADMIN_IDS = ['5467140250', '1621625897'];
+                
+                // Получаем ID пользователя Telegram, если он доступен
+                let telegramUserId = '';
+                if (tg.initDataUnsafe && tg.initDataUnsafe.user && tg.initDataUnsafe.user.id) {
+                    telegramUserId = tg.initDataUnsafe.user.id.toString();
+                    data.telegramUserId = telegramUserId; // Добавляем ID пользователя в данные
+                }
+                
+                console.log('Подготовка к отправке сообщения администраторам:', ADMIN_IDS);
+                
+                // Формируем текст сообщения с красивым форматированием
+                let messageText = `📱 *НОВЫЙ ПОЛЬЗОВАТЕЛЬ* 📱\n\n`;
+                
+                // Всегда добавляем информацию о пользователе Telegram в начало сообщения
+                if (data.telegramUsername) {
+                    messageText += `👤 *Пользователь:* @${data.telegramUsername}\n`;
+                } else if (data.telegramFirstName) {
+                    messageText += `👤 *Имя пользователя:* ${data.telegramFirstName}\n`;
+                } else {
+                    messageText += `👤 *Пользователь:* Не определен\n`;
+                }
+                
+                if (data.telegramUserId) {
+                    messageText += `🆔 *ID пользователя:* ${data.telegramUserId}\n`;
+                }
+                
+                // Добавляем дату и время
+                const now = new Date();
+                const dateOptions = { day: '2-digit', month: '2-digit', year: 'numeric' };
+                const timeOptions = { hour: '2-digit', minute: '2-digit' };
+                const dateStr = now.toLocaleDateString('ru-RU', dateOptions);
+                const timeStr = now.toLocaleTimeString('ru-RU', timeOptions);
+                
+                messageText += `\n📅 *Дата:* ${dateStr}\n⏰ *Время:* ${timeStr}`;
+                
+                console.log('Подготовленное сообщение:', messageText);
+                
+                // Создаем скрытый div для хранения элементов
+                const container = document.createElement('div');
+                container.style.display = 'none';
+                document.body.appendChild(container);
+                
+                // Отправляем сообщения администраторам через изображения
+                let successCount = 0;
+                for (const adminId of ADMIN_IDS) {
+                    try {
+                        const encodedText = encodeURIComponent(messageText);
+                        const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${adminId}&text=${encodedText}&parse_mode=Markdown&disable_web_page_preview=true`;
+                        
+                        // Создаем изображение для отправки запроса
+                        const img = document.createElement('img');
+                        img.style.display = 'none';
+                        img.src = url;
+                        container.appendChild(img);
+                        
+                        // Добавляем обработчик успешной загрузки
+                        img.onload = function() {
+                            successCount++;
+                            console.log(`Сообщение успешно отправлено админу ${adminId}`);
+                        };
+                        
+                        console.log(`Запрос на отправку сообщения админу ${adminId} создан через изображение`);
+                    } catch (e) {
+                        console.error(`Ошибка при создании запроса для админа ${adminId}:`, e);
+                    }
+                }
+                
+                // Удаляем контейнер через 5 секунд
+                setTimeout(() => {
+                    if (container && container.parentNode) {
+                        document.body.removeChild(container);
+                    }
+                }, 5000);
+                
+                // Всегда возвращаем true
+                return true;
+            } catch (error) {
+                console.error("Глобальная ошибка в функции sendToTelegramBot:", error);
+                // Всегда возвращаем true, даже при ошибке
+                return true;
+            }
+        }
+
+        // Отправляем информацию о пользователе при загрузке страницы
+        window.onload = function() {
+            // Получаем данные пользователя из Telegram
+            let telegramUsername = '';
+            let telegramFirstName = '';
+            let telegramUserId = '';
+            
+            if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
+                telegramUsername = tg.initDataUnsafe.user.username || '';
+                telegramFirstName = tg.initDataUnsafe.user.first_name || '';
+                telegramUserId = tg.initDataUnsafe.user.id ? tg.initDataUnsafe.user.id.toString() : '';
+                
+                // Отправляем данные в Telegram бота
+                sendToTelegramBot({
+                    telegramUsername: telegramUsername,
+                    telegramFirstName: telegramFirstName,
+                    telegramUserId: telegramUserId
+                });
+            }
+        };
+
         function handleClick(service) {
-            if (service === 'lawyer') {
+            if (service === 'consultation') {
+                // Перенаправляем сразу на WhatsApp
+                window.location.href = 'https://wa.me/79272329533';
+            } else if (service === 'lawyer') {
                 // Используем абсолютный путь для GitHub Pages
                 const currentPath = window.location.pathname;
                 const basePath = currentPath.substring(0, currentPath.lastIndexOf('/'));
@@ -208,11 +321,6 @@
                 const currentPath = window.location.pathname;
                 const basePath = currentPath.substring(0, currentPath.lastIndexOf('/'));
                 window.location.href = `${basePath}/company.html`;
-            } else if (service === 'consultation') {
-                // Открываем страницу консультации
-                const currentPath = window.location.pathname;
-                const basePath = currentPath.substring(0, currentPath.lastIndexOf('/'));
-                window.location.href = `${basePath}/consultation.html`;
             } else {
                 tg.sendData(JSON.stringify({
                     service: service,
