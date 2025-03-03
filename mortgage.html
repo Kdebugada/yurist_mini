@@ -745,14 +745,24 @@
                         // Скрываем индикатор загрузки
                         document.getElementById('loading').style.display = 'none';
                         
-                        // Открываем WhatsApp во внешнем браузере
-                        const link = document.createElement('a');
-                        link.href = 'https://wa.me/79272329533';
-                        link.target = '_blank';
-                        link.rel = 'noopener noreferrer';
-                        document.body.appendChild(link);
-                        link.click();
-                        document.body.removeChild(link);
+                        // Проверяем, является ли устройство iOS
+                        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+                                     (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+                        
+                        // Используем разные методы открытия WhatsApp в зависимости от устройства
+                        if (isIOS && tg && typeof tg.openLink === 'function') {
+                            // Для iOS используем Telegram WebApp API
+                            tg.openLink('https://wa.me/79272329533');
+                        } else {
+                            // Для других устройств используем стандартный метод
+                            const link = document.createElement('a');
+                            link.href = 'https://wa.me/79272329533';
+                            link.target = '_blank';
+                            link.rel = 'noopener noreferrer';
+                            document.body.appendChild(link);
+                            link.click();
+                            document.body.removeChild(link);
+                        }
                     }, 1000);
                 }, 500);
                 
@@ -760,14 +770,25 @@
                 console.error("Критическая ошибка в функции submitForm:", error);
                 // Скрываем индикатор загрузки
                 document.getElementById('loading').style.display = 'none';
-                // В случае ошибки всё равно открываем WhatsApp во внешнем браузере
-                const link = document.createElement('a');
-                link.href = 'https://wa.me/79272329533';
-                link.target = '_blank';
-                link.rel = 'noopener noreferrer';
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
+                
+                // Проверяем, является ли устройство iOS
+                const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+                             (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+                
+                // Используем разные методы открытия WhatsApp в зависимости от устройства
+                if (isIOS && tg && typeof tg.openLink === 'function') {
+                    // Для iOS используем Telegram WebApp API
+                    tg.openLink('https://wa.me/79272329533');
+                } else {
+                    // Для других устройств используем стандартный метод
+                    const link = document.createElement('a');
+                    link.href = 'https://wa.me/79272329533';
+                    link.target = '_blank';
+                    link.rel = 'noopener noreferrer';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                }
             }
         }
         
