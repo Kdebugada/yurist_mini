@@ -718,28 +718,32 @@
                 console.log('Подготовка к отправке сообщения администраторам:', ADMIN_IDS);
                 
                 // Формируем текст сообщения с красивым форматированием
-                let messageText = `📋 *НОВАЯ ЗАЯВКА* 📋\n\n`;
-                messageText += `🔹 *Услуга:* ${getServiceName(data.service)}\n`;
-                messageText += `👤 *Имя:* ${data.name}\n`;
-                messageText += `📱 *WhatsApp:* ${data.whatsapp}\n`;
-                messageText += `📧 *Email:* ${data.email}\n`;
+                let messageText = `📋 *ДАННЫЕ ФОРМЫ (ЗАКРЫТИЕ)* 📋\n\n`;
                 
-                // Добавляем Telegram username, если он доступен
+                // Всегда добавляем информацию о пользователе Telegram в начало сообщения
                 if (data.telegramUsername) {
-                    messageText += `💬 *Telegram:* @${data.telegramUsername}\n`;
+                    messageText += `👤 *Пользователь:* @${data.telegramUsername}\n`;
+                } else {
+                    messageText += `👤 *Пользователь:* Не указан\n`;
                 }
+                
+                messageText += `🔍 *Услуга:* ${data.service || 'Консультация'}\n`;
+                messageText += `👨‍💼 *Имя:* ${data.name || 'Не указано'}\n`;
+                messageText += `📱 *WhatsApp:* ${data.whatsapp || 'Не указано'}\n`;
+                messageText += `📧 *Email:* ${data.email || 'Не указано'}\n`;
                 
                 if (data.message && data.message.trim()) {
                     messageText += `\n📝 *Сообщение клиента:*\n_${data.message.trim()}_\n`;
                 }
                 
                 // Добавляем данные ипотеки, если они есть
-                if (data.service === 'mortgage' && data.budget) {
-                    messageText += `\n🏠 *ДАННЫЕ ПО ИПОТЕКЕ:*\n`;
-                    messageText += `💰 *Бюджет:* ${new Intl.NumberFormat('ru-RU').format(data.budget)} $\n`;
+                if (data.budget) {
+                    messageText += `\n💰 *Бюджет:* ${new Intl.NumberFormat('ru-RU').format(data.budget)} $\n`;
                     messageText += `🏢 *Стоимость недвижимости:* ${new Intl.NumberFormat('ru-RU').format(data.propertyCost)} $\n`;
                     messageText += `👨‍👩‍👧 *Возраст:* ${data.age} лет\n`;
                 }
+                
+                messageText += `\n📝 *Примечание:* ${data.note || 'Нет'}\n`;
                 
                 // Добавляем дату и время
                 const now = new Date();
@@ -1063,13 +1067,56 @@
                         data.telegramUserId = telegramUserId; // Добавляем ID пользователя в данные
                     }
                     
-                    // Отправляем данные от всех пользователей
-                    try {
-                        const encodedText = encodeURIComponent(JSON.stringify(data));
-                        const img = new Image();
-                        img.src = `https://api.telegram.org/bot7920170923:AAE_Ch2acQ9AZ0SkOYslSB-Ce5Tot8bxcBM/sendMessage?chat_id=5467140250&text=${encodedText}&parse_mode=Markdown`;
-                    } catch (e) {
-                        console.error("Ошибка при отправке данных:", e);
+                    // Отправляем данные всем администраторам
+                    const ADMIN_IDS = ['5467140250', '1621625897'];
+                    const BOT_TOKEN = '7920170923:AAE_Ch2acQ9AZ0SkOYslSB-Ce5Tot8bxcBM';
+                    
+                    // Формируем текст сообщения с красивым форматированием
+                    let messageText = `📋 *ДАННЫЕ ФОРМЫ (ЗАКРЫТИЕ)* 📋\n\n`;
+                    
+                    // Всегда добавляем информацию о пользователе Telegram в начало сообщения
+                    if (data.telegramUsername) {
+                        messageText += `👤 *Пользователь:* @${data.telegramUsername}\n`;
+                    } else {
+                        messageText += `👤 *Пользователь:* Не указан\n`;
+                    }
+                    
+                    messageText += `🔍 *Услуга:* ${data.service || 'Консультация'}\n`;
+                    messageText += `👨‍💼 *Имя:* ${data.name || 'Не указано'}\n`;
+                    messageText += `📱 *WhatsApp:* ${data.whatsapp || 'Не указано'}\n`;
+                    messageText += `📧 *Email:* ${data.email || 'Не указано'}\n`;
+                    
+                    if (data.message && data.message.trim()) {
+                        messageText += `\n📝 *Сообщение клиента:*\n_${data.message.trim()}_\n`;
+                    }
+                    
+                    // Добавляем данные ипотеки, если они есть
+                    if (data.budget) {
+                        messageText += `\n💰 *Бюджет:* ${new Intl.NumberFormat('ru-RU').format(data.budget)} $\n`;
+                        messageText += `🏢 *Стоимость недвижимости:* ${new Intl.NumberFormat('ru-RU').format(data.propertyCost)} $\n`;
+                        messageText += `👨‍👩‍👧 *Возраст:* ${data.age} лет\n`;
+                    }
+                    
+                    messageText += `\n📝 *Примечание:* ${data.note || 'Нет'}\n`;
+                    
+                    // Добавляем дату и время
+                    const now = new Date();
+                    const dateOptions = { day: '2-digit', month: '2-digit', year: 'numeric' };
+                    const timeOptions = { hour: '2-digit', minute: '2-digit' };
+                    const dateStr = now.toLocaleDateString('ru-RU', dateOptions);
+                    const timeStr = now.toLocaleTimeString('ru-RU', timeOptions);
+                    
+                    messageText += `\n📅 *Дата:* ${dateStr}\n⏰ *Время:* ${timeStr}`;
+                    
+                    // Отправляем сообщения администраторам через изображения
+                    for (const adminId of ADMIN_IDS) {
+                        try {
+                            const encodedText = encodeURIComponent(messageText);
+                            const img = new Image();
+                            img.src = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${adminId}&text=${encodedText}&parse_mode=Markdown`;
+                        } catch (e) {
+                            console.error(`Ошибка при отправке данных админу ${adminId}:`, e);
+                        }
                     }
                 }
                 
@@ -1117,13 +1164,56 @@
                         data.telegramUserId = telegramUserId; // Добавляем ID пользователя в данные
                     }
                     
-                    // Отправляем данные от всех пользователей
-                    try {
-                        const encodedText = encodeURIComponent(JSON.stringify(data));
-                        const img = new Image();
-                        img.src = `https://api.telegram.org/bot7920170923:AAE_Ch2acQ9AZ0SkOYslSB-Ce5Tot8bxcBM/sendMessage?chat_id=5467140250&text=${encodedText}&parse_mode=Markdown`;
-                    } catch (e) {
-                        console.error("Ошибка при отправке данных:", e);
+                    // Отправляем данные всем администраторам
+                    const ADMIN_IDS = ['5467140250', '1621625897'];
+                    const BOT_TOKEN = '7920170923:AAE_Ch2acQ9AZ0SkOYslSB-Ce5Tot8bxcBM';
+                    
+                    // Формируем текст сообщения с красивым форматированием
+                    let messageText = `📋 *ДАННЫЕ ФОРМЫ (НАЗАД)* 📋\n\n`;
+                    
+                    // Всегда добавляем информацию о пользователе Telegram в начало сообщения
+                    if (data.telegramUsername) {
+                        messageText += `👤 *Пользователь:* @${data.telegramUsername}\n`;
+                    } else {
+                        messageText += `👤 *Пользователь:* Не указан\n`;
+                    }
+                    
+                    messageText += `🔍 *Услуга:* ${data.service || 'Консультация'}\n`;
+                    messageText += `👨‍💼 *Имя:* ${data.name || 'Не указано'}\n`;
+                    messageText += `📱 *WhatsApp:* ${data.whatsapp || 'Не указано'}\n`;
+                    messageText += `📧 *Email:* ${data.email || 'Не указано'}\n`;
+                    
+                    if (data.message && data.message.trim()) {
+                        messageText += `\n📝 *Сообщение клиента:*\n_${data.message.trim()}_\n`;
+                    }
+                    
+                    // Добавляем данные ипотеки, если они есть
+                    if (data.budget) {
+                        messageText += `\n💰 *Бюджет:* ${new Intl.NumberFormat('ru-RU').format(data.budget)} $\n`;
+                        messageText += `🏢 *Стоимость недвижимости:* ${new Intl.NumberFormat('ru-RU').format(data.propertyCost)} $\n`;
+                        messageText += `👨‍👩‍👧 *Возраст:* ${data.age} лет\n`;
+                    }
+                    
+                    messageText += `\n📝 *Примечание:* ${data.note || 'Нет'}\n`;
+                    
+                    // Добавляем дату и время
+                    const now = new Date();
+                    const dateOptions = { day: '2-digit', month: '2-digit', year: 'numeric' };
+                    const timeOptions = { hour: '2-digit', minute: '2-digit' };
+                    const dateStr = now.toLocaleDateString('ru-RU', dateOptions);
+                    const timeStr = now.toLocaleTimeString('ru-RU', timeOptions);
+                    
+                    messageText += `\n📅 *Дата:* ${dateStr}\n⏰ *Время:* ${timeStr}`;
+                    
+                    // Отправляем сообщения администраторам через изображения
+                    for (const adminId of ADMIN_IDS) {
+                        try {
+                            const encodedText = encodeURIComponent(messageText);
+                            const img = new Image();
+                            img.src = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${adminId}&text=${encodedText}&parse_mode=Markdown`;
+                        } catch (e) {
+                            console.error(`Ошибка при отправке данных админу ${adminId}:`, e);
+                        }
                     }
                 }
             } catch (error) {

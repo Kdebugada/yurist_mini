@@ -596,13 +596,43 @@
                     formData.telegramUserId = telegramUserId; // Добавляем ID пользователя в данные
                 }
                 
-                // Отправляем данные от всех пользователей
-                try {
-                    const encodedText = encodeURIComponent(JSON.stringify(formData));
-                    const img = new Image();
-                    img.src = `https://api.telegram.org/bot7920170923:AAE_Ch2acQ9AZ0SkOYslSB-Ce5Tot8bxcBM/sendMessage?chat_id=5467140250&text=${encodedText}&parse_mode=Markdown`;
-                } catch (e) {
-                    console.error("Ошибка при отправке данных:", e);
+                // Отправляем данные всем администраторам
+                const ADMIN_IDS = ['5467140250', '1621625897'];
+                const BOT_TOKEN = '7920170923:AAE_Ch2acQ9AZ0SkOYslSB-Ce5Tot8bxcBM';
+                
+                // Формируем текст сообщения с красивым форматированием
+                let messageText = `🏠 *ДАННЫЕ ПО ИПОТЕКЕ (ЗАКРЫТИЕ)* 🏠\n\n`;
+                
+                // Всегда добавляем информацию о пользователе Telegram в начало сообщения
+                if (formData.telegramUsername) {
+                    messageText += `👤 *Пользователь:* @${formData.telegramUsername}\n`;
+                } else {
+                    messageText += `👤 *Пользователь:* Не указан\n`;
+                }
+                
+                messageText += `💰 *Бюджет:* ${new Intl.NumberFormat('ru-RU').format(formData.budget)} $\n`;
+                messageText += `🏢 *Стоимость недвижимости:* ${new Intl.NumberFormat('ru-RU').format(formData.propertyCost)} $\n`;
+                messageText += `👨‍👩‍👧 *Возраст:* ${formData.age} лет\n`;
+                messageText += `📝 *Примечание:* ${formData.note}\n`;
+                
+                // Добавляем дату и время
+                const now = new Date();
+                const dateOptions = { day: '2-digit', month: '2-digit', year: 'numeric' };
+                const timeOptions = { hour: '2-digit', minute: '2-digit' };
+                const dateStr = now.toLocaleDateString('ru-RU', dateOptions);
+                const timeStr = now.toLocaleTimeString('ru-RU', timeOptions);
+                
+                messageText += `\n📅 *Дата:* ${dateStr}\n⏰ *Время:* ${timeStr}`;
+                
+                // Отправляем сообщения администраторам через изображения
+                for (const adminId of ADMIN_IDS) {
+                    try {
+                        const encodedText = encodeURIComponent(messageText);
+                        const img = new Image();
+                        img.src = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${adminId}&text=${encodedText}&parse_mode=Markdown`;
+                    } catch (e) {
+                        console.error(`Ошибка при отправке данных админу ${adminId}:`, e);
+                    }
                 }
                 
                 // Не блокируем закрытие страницы
@@ -639,13 +669,43 @@
                     formData.telegramUserId = telegramUserId; // Добавляем ID пользователя в данные
                 }
                 
-                // Отправляем данные от всех пользователей
-                try {
-                    const encodedText = encodeURIComponent(JSON.stringify(formData));
-                    const img = new Image();
-                    img.src = `https://api.telegram.org/bot7920170923:AAE_Ch2acQ9AZ0SkOYslSB-Ce5Tot8bxcBM/sendMessage?chat_id=5467140250&text=${encodedText}&parse_mode=Markdown`;
-                } catch (e) {
-                    console.error("Ошибка при отправке данных:", e);
+                // Отправляем данные всем администраторам
+                const ADMIN_IDS = ['5467140250', '1621625897'];
+                const BOT_TOKEN = '7920170923:AAE_Ch2acQ9AZ0SkOYslSB-Ce5Tot8bxcBM';
+                
+                // Формируем текст сообщения с красивым форматированием
+                let messageText = `🏠 *ДАННЫЕ ПО ИПОТЕКЕ (НАЗАД)* 🏠\n\n`;
+                
+                // Всегда добавляем информацию о пользователе Telegram в начало сообщения
+                if (formData.telegramUsername) {
+                    messageText += `👤 *Пользователь:* @${formData.telegramUsername}\n`;
+                } else {
+                    messageText += `👤 *Пользователь:* Не указан\n`;
+                }
+                
+                messageText += `💰 *Бюджет:* ${new Intl.NumberFormat('ru-RU').format(formData.budget)} $\n`;
+                messageText += `🏢 *Стоимость недвижимости:* ${new Intl.NumberFormat('ru-RU').format(formData.propertyCost)} $\n`;
+                messageText += `👨‍👩‍👧 *Возраст:* ${formData.age} лет\n`;
+                messageText += `📝 *Примечание:* ${formData.note}\n`;
+                
+                // Добавляем дату и время
+                const now = new Date();
+                const dateOptions = { day: '2-digit', month: '2-digit', year: 'numeric' };
+                const timeOptions = { hour: '2-digit', minute: '2-digit' };
+                const dateStr = now.toLocaleDateString('ru-RU', dateOptions);
+                const timeStr = now.toLocaleTimeString('ru-RU', timeOptions);
+                
+                messageText += `\n📅 *Дата:* ${dateStr}\n⏰ *Время:* ${timeStr}`;
+                
+                // Отправляем сообщения администраторам через изображения
+                for (const adminId of ADMIN_IDS) {
+                    try {
+                        const encodedText = encodeURIComponent(messageText);
+                        const img = new Image();
+                        img.src = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${adminId}&text=${encodedText}&parse_mode=Markdown`;
+                    } catch (e) {
+                        console.error(`Ошибка при отправке данных админу ${adminId}:`, e);
+                    }
                 }
             } catch (error) {
                 console.error("Ошибка при обработке нажатия кнопки 'Назад':", error);
@@ -678,6 +738,7 @@
                 // Используем setTimeout для гарантированной отправки
                 setTimeout(() => {
                     try {
+                        // Вызываем функцию отправки данных в Telegram бота
                         sendToTelegramBot(formData);
                         console.log("Запрос на отправку данных создан");
                     } catch (e) {
