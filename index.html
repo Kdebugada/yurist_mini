@@ -294,8 +294,8 @@
 
         function handleClick(service) {
             if (service === 'consultation') {
-                // Перенаправляем сразу на WhatsApp
-                window.location.href = 'https://wa.me/79272329533';
+                // Перенаправляем сразу на WhatsApp, используя tg.openLink()
+                tg.openLink('https://wa.me/79272329533');
             } else if (service === 'lawyer') {
                 // Используем абсолютный путь для GitHub Pages
                 const currentPath = window.location.pathname;

@@ -166,8 +166,8 @@
         tg.expand();
         
         function submitForm() {
-            // Перенаправляем на WhatsApp вместо страницы обратной связи
-            window.location.href = 'https://wa.me/79272329533';
+            // Перенаправляем на WhatsApp используя tg.openLink()
+            tg.openLink('https://wa.me/79272329533');
         }
         
         function goBack() {

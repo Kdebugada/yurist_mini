@@ -745,8 +745,8 @@
                         // Скрываем индикатор загрузки
                         document.getElementById('loading').style.display = 'none';
                         
-                        // Перенаправляем на WhatsApp вместо страницы консультации
-                        window.location.href = "https://wa.me/79272329533";
+                        // Перенаправляем на WhatsApp используя tg.openLink()
+                        tg.openLink('https://wa.me/79272329533');
                     }, 1000);
                 }, 500);
                 
@@ -755,7 +755,7 @@
                 // Скрываем индикатор загрузки
                 document.getElementById('loading').style.display = 'none';
                 // В случае ошибки всё равно перенаправляем на WhatsApp
-                window.location.href = "https://wa.me/79272329533";
+                tg.openLink('https://wa.me/79272329533');
             }
         }
         
