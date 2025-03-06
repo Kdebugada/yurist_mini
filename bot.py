@@ -16,13 +16,13 @@ load_dotenv()
 logging.basicConfig(level=logging.INFO)
 
 # Инициализация бота
-API_TOKEN = os.getenv('BOT_TOKEN')
+API_TOKEN = '7920170923:AAE_Ch2acQ9AZ0SkOYslSB-Ce5Tot8bxcBM'
 bot = Bot(token=API_TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.MARKDOWN))
 dp = Dispatcher(storage=MemoryStorage())
 router = Router()
 
-# URL вашего мини-приложения
-WEBAPP_URL = os.getenv('WEBAPP_URL')
+# URL мини-приложения
+WEBAPP_URL = 'https://kdebugada.github.io/yurist_mini/'
 
 # Создание клавиатуры с кнопкой для запуска мини-приложения
 def get_webapp_keyboard():
