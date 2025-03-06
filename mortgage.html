@@ -49,6 +49,11 @@
             backdrop-filter: blur(5px);
             animation: fadeInUp 0.8s ease-out forwards;
             opacity: 0;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        .slider-container:hover {
+            background: rgba(255, 255, 255, 0.2);
         }
         .slider-container:nth-child(2) {
             animation-delay: 0.1s;
@@ -489,6 +494,50 @@
             
             slider.addEventListener('touchmove', function(e) {
                 e.stopPropagation();
+            }, { passive: true });
+            
+            // Добавляем обработчик для родительского контейнера слайдера
+            const sliderContainer = slider.closest('.slider-container');
+            
+            // Функция для обработки клика по контейнеру слайдера
+            function handleSliderContainerClick(e) {
+                // Проверяем, что клик был не по самому ползунку
+                if (e.target !== slider && !e.target.classList.contains('range-slider')) {
+                    // Получаем размеры и позицию слайдера
+                    const sliderRect = slider.getBoundingClientRect();
+                    // Вычисляем относительную позицию клика внутри слайдера
+                    const clickPosition = (e.clientX - sliderRect.left) / sliderRect.width;
+                    
+                    // Вычисляем новое значение слайдера
+                    const min = parseFloat(slider.min);
+                    const max = parseFloat(slider.max);
+                    const newValue = min + clickPosition * (max - min);
+                    
+                    // Округляем до шага слайдера
+                    const step = parseFloat(slider.step) || 1;
+                    const roundedValue = Math.round(newValue / step) * step;
+                    
+                    // Устанавливаем новое значение
+                    slider.value = Math.min(max, Math.max(min, roundedValue));
+                    
+                    // Вызываем событие input для обновления отображения
+                    const inputEvent = new Event('input', { bubbles: true });
+                    slider.dispatchEvent(inputEvent);
+                }
+            }
+            
+            // Добавляем обработчик клика для контейнера
+            sliderContainer.addEventListener('click', handleSliderContainerClick);
+            
+            // Добавляем обработчик касания для мобильных устройств
+            sliderContainer.addEventListener('touchend', function(e) {
+                // Преобразуем событие касания в событие клика
+                const touch = e.changedTouches[0];
+                const clickEvent = new MouseEvent('click', {
+                    clientX: touch.clientX,
+                    clientY: touch.clientY
+                });
+                sliderContainer.dispatchEvent(clickEvent);
             }, { passive: true });
         });
         
