@@ -77,6 +77,7 @@
             font-size: 18px; /* Увеличиваем размер шрифта с 15px до 18px */
             color: var(--tg-theme-button-color, #3390ec);
             transition: all 0.3s ease;
+            will-change: transform; /* Оптимизация производительности */
         }
         .range-slider {
             -webkit-appearance: none;
@@ -87,6 +88,7 @@
             outline: none;
             border-radius: 3px;
             margin: 5px 0; /* Уменьшаем отступ */
+            transition: height 0.3s ease; /* Добавляем плавный переход */
         }
         .range-slider:hover {
             height: 8px; /* Уменьшаем с 10px до 8px */
@@ -101,6 +103,7 @@
             cursor: pointer;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
             transition: all 0.3s ease;
+            will-change: transform; /* Оптимизация производительности */
         }
         .range-slider::-webkit-slider-thumb:hover {
             transform: scale(1.2);
@@ -114,6 +117,8 @@
             cursor: pointer;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
             border: none;
+            transition: all 0.3s ease;
+            will-change: transform; /* Оптимизация производительности */
         }
         .range-values {
             display: flex;
@@ -460,6 +465,33 @@
             });
         });
         
+        // Улучшенная обработка слайдеров для плавного движения
+        document.querySelectorAll('.range-slider').forEach(slider => {
+            // Добавляем обработчик события input для плавного обновления значений
+            slider.addEventListener('input', function(e) {
+                e.preventDefault();
+                // Используем requestAnimationFrame для оптимизации производительности
+                requestAnimationFrame(() => {
+                    if (this.id === 'budget') {
+                        updateBudgetValue(this.value);
+                    } else if (this.id === 'property-cost') {
+                        updatePropertyValue(this.value);
+                    } else if (this.id === 'age') {
+                        updateAgeValue(this.value);
+                    }
+                });
+            });
+            
+            // Предотвращаем рывки при касании на мобильных устройствах
+            slider.addEventListener('touchstart', function(e) {
+                e.stopPropagation();
+            }, { passive: true });
+            
+            slider.addEventListener('touchmove', function(e) {
+                e.stopPropagation();
+            }, { passive: true });
+        });
+        
         // Функция для отправки данных в Telegram бота
         async function sendToTelegramBot(data) {
             try {
@@ -552,17 +584,29 @@
         function updateBudgetValue(index) {
             const value = budgetValues[index];
             const formattedValue = new Intl.NumberFormat('ru-RU').format(value);
-            document.getElementById('budget-value').textContent = formattedValue + ' $';
+            const element = document.getElementById('budget-value');
+            // Плавное обновление значения
+            requestAnimationFrame(() => {
+                element.textContent = formattedValue + ' $';
+            });
         }
         
         function updatePropertyValue(index) {
             const value = propertyValues[index];
             const formattedValue = new Intl.NumberFormat('ru-RU').format(value);
-            document.getElementById('property-value').textContent = formattedValue + ' $';
+            const element = document.getElementById('property-value');
+            // Плавное обновление значения
+            requestAnimationFrame(() => {
+                element.textContent = formattedValue + ' $';
+            });
         }
         
         function updateAgeValue(value) {
-            document.getElementById('age-value').textContent = value + ' лет';
+            const element = document.getElementById('age-value');
+            // Плавное обновление значения
+            requestAnimationFrame(() => {
+                element.textContent = value + ' лет';
+            });
         }
         
         // Обработчик события закрытия приложения
