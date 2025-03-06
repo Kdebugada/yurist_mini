@@ -1,0 +1,3 @@
+[submodule "yurist_mini"]
+	path = yurist_mini
+	url = https://github.com/Kdebugada/yurist_mini.git
