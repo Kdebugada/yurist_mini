@@ -55,6 +55,10 @@
         .slider-container:hover {
             background: rgba(255, 255, 255, 0.2);
         }
+        .slider-container.active {
+            background: rgba(255, 255, 255, 0.3);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
         .slider-container:nth-child(2) {
             animation-delay: 0.1s;
         }
@@ -539,6 +543,107 @@
                 });
                 sliderContainer.dispatchEvent(clickEvent);
             }, { passive: true });
+            
+            // Переменная для отслеживания состояния перетаскивания
+            let isDragging = false;
+            
+            // Функция для обновления значения слайдера при перетаскивании
+            function updateSliderOnDrag(e) {
+                if (!isDragging) return;
+                
+                // Получаем координаты касания или мыши
+                const clientX = e.clientX || (e.touches && e.touches[0] ? e.touches[0].clientX : null);
+                if (clientX === null) return;
+                
+                // Получаем размеры и позицию слайдера
+                const sliderRect = slider.getBoundingClientRect();
+                // Вычисляем относительную позицию внутри слайдера
+                let dragPosition = (clientX - sliderRect.left) / sliderRect.width;
+                // Ограничиваем значение от 0 до 1
+                dragPosition = Math.min(1, Math.max(0, dragPosition));
+                
+                // Вычисляем новое значение слайдера
+                const min = parseFloat(slider.min);
+                const max = parseFloat(slider.max);
+                const newValue = min + dragPosition * (max - min);
+                
+                // Округляем до шага слайдера
+                const step = parseFloat(slider.step) || 1;
+                const roundedValue = Math.round(newValue / step) * step;
+                
+                // Устанавливаем новое значение
+                slider.value = Math.min(max, Math.max(min, roundedValue));
+                
+                // Вызываем событие input для обновления отображения
+                const inputEvent = new Event('input', { bubbles: true });
+                slider.dispatchEvent(inputEvent);
+                
+                // Находим элемент отображения значения и добавляем эффект масштабирования
+                let valueElement;
+                if (slider.id === 'budget') {
+                    valueElement = document.getElementById('budget-value');
+                } else if (slider.id === 'property-cost') {
+                    valueElement = document.getElementById('property-value');
+                } else if (slider.id === 'age') {
+                    valueElement = document.getElementById('age-value');
+                }
+                
+                if (valueElement) {
+                    // Добавляем эффект масштабирования
+                    valueElement.style.transform = 'scale(1.1)';
+                    valueElement.style.fontWeight = '700';
+                    
+                    // Сбрасываем эффект через небольшую задержку
+                    clearTimeout(valueElement.resetTimeout);
+                    valueElement.resetTimeout = setTimeout(() => {
+                        valueElement.style.transform = '';
+                        valueElement.style.fontWeight = '';
+                    }, 1000);
+                }
+                
+                // Предотвращаем прокрутку страницы при перетаскивании
+                e.preventDefault();
+            }
+            
+            // Функция для начала перетаскивания
+            function startDragging(e) {
+                // Проверяем, что нажатие было не по самому ползунку
+                if (e.target !== slider && !e.target.classList.contains('range-slider')) {
+                    isDragging = true;
+                    // Добавляем класс active для визуального эффекта
+                    sliderContainer.classList.add('active');
+                    // Сразу обновляем значение слайдера
+                    updateSliderOnDrag(e);
+                    
+                    // Добавляем обработчики для отслеживания движения и окончания перетаскивания
+                    document.addEventListener('mousemove', updateSliderOnDrag);
+                    document.addEventListener('touchmove', updateSliderOnDrag, { passive: false });
+                    document.addEventListener('mouseup', stopDragging);
+                    document.addEventListener('touchend', stopDragging);
+                    
+                    // Предотвращаем выделение текста при перетаскивании
+                    e.preventDefault();
+                }
+            }
+            
+            // Функция для окончания перетаскивания
+            function stopDragging() {
+                if (isDragging) {
+                    isDragging = false;
+                    // Удаляем класс active
+                    sliderContainer.classList.remove('active');
+                    
+                    // Удаляем обработчики
+                    document.removeEventListener('mousemove', updateSliderOnDrag);
+                    document.removeEventListener('touchmove', updateSliderOnDrag);
+                    document.removeEventListener('mouseup', stopDragging);
+                    document.removeEventListener('touchend', stopDragging);
+                }
+            }
+            
+            // Добавляем обработчики для начала перетаскивания
+            sliderContainer.addEventListener('mousedown', startDragging);
+            sliderContainer.addEventListener('touchstart', startDragging, { passive: false });
         });
         
         // Функция для отправки данных в Telegram бота
