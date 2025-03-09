@@ -1,5 +1,4 @@
 import logging
-import os
 import asyncio
 from aiogram import Bot, Dispatcher, types, Router
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
@@ -7,30 +6,18 @@ from aiogram.filters import Command
 from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
 from aiogram.fsm.storage.memory import MemoryStorage
-from dotenv import load_dotenv
-import sys
-
-# Загрузка переменных окружения
-load_dotenv()
 
 # Настройка логирования
 logging.basicConfig(level=logging.INFO)
 
 # Инициализация бота
-API_TOKEN = os.getenv('API_TOKEN')
-if not API_TOKEN:
-    logging.error("Ошибка: Переменная окружения API_TOKEN не найдена в файле .env")
-    sys.exit(1)
-
+API_TOKEN = '7691650728:AAHZj6V35OPoq8qh5Ke3CgquHu5XA6sK1js'
 bot = Bot(token=API_TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.MARKDOWN))
 dp = Dispatcher(storage=MemoryStorage())
 router = Router()
 
 # URL мини-приложения
-WEBAPP_URL = os.getenv('WEBAPP_URL')
-if not WEBAPP_URL:
-    logging.error("Ошибка: Переменная окружения WEBAPP_URL не найдена в файле .env")
-    sys.exit(1)
+WEBAPP_URL = 'https://kdebugada.github.io/yurist_mini/'
 
 # Создание клавиатуры с кнопкой для запуска мини-приложения
 def get_webapp_keyboard():
